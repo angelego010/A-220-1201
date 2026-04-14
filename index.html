@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>220-1201 Quiz — Grid Build LLC</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16161e;
+    --surface: #1c1c26;
+    --surface2: #222230;
+    --border: #2a2a3a;
+    --accent: #E8622A;
+    --accent2: #5bade6;
+    --warn: #f39c12;
+    --danger: #e74c3c;
+    --text: #e0e0e8;
+    --muted: #6a6a80;
+    --success: #2ecc71;
+    --d1: #5bade6;
+    --d2: #9b59b6;
+    --d3: #2ecc71;
+    --d4: #f39c12;
+    --d5: #e74c3c;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Outfit', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(232,98,42,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,98,42,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ── SCREEN SYSTEM ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── HOME SCREEN ── */
+  #screen-home { padding: 60px 0 40px; }
+
+  .logo-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 48px;
+  }
+  .logo-badge {
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .hero-title {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 520px;
+    margin-bottom: 48px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+
+  .domain-legend {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 48px;
+  }
+  .domain-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .domain-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 500px) { .mode-grid { grid-template-columns: 1fr; } }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-card:hover { border-color: var(--accent); background: var(--surface2); }
+  .mode-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(232,98,42,0.05), var(--surface));
+  }
+  .mode-badge {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .mode-icon { font-size: 28px; margin-bottom: 12px; }
+  .mode-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .mode-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── QUIZ SCREEN ── */
+  #screen-quiz { padding: 24px 0 60px; }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .quiz-meta {
+    display: flex; align-items: center; gap: 20px;
+  }
+
+  .q-counter {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .q-counter strong { color: var(--text); font-weight: 600; }
+
+  .domain-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    padding: 3px 9px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .timer-box.warn { color: var(--warn); border-color: var(--warn); }
+  .timer-box.danger { color: var(--danger); border-color: var(--danger); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .multi-hint {
+    display: inline-block;
+    background: rgba(243,156,18,0.12);
+    color: var(--warn);
+    border: 1px solid rgba(243,156,18,0.3);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+  }
+
+  .q-stem {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 400;
+    white-space: pre-wrap;
+  }
+  .q-stem img { white-space: normal; }
+
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent2); background: rgba(91,173,230,0.06); }
+  .option-btn:disabled { cursor: default; }
+
+  .option-key {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 1px;
+    min-width: 18px;
+    transition: color 0.12s;
+  }
+
+  .option-btn.selected { border-color: var(--accent2); background: rgba(91,173,230,0.1); }
+  .option-btn.selected .option-key { color: var(--accent2); }
+  .option-btn.correct { border-color: var(--success); background: rgba(46,204,113,0.08); }
+  .option-btn.correct .option-key { color: var(--success); }
+  .option-btn.wrong { border-color: var(--danger); background: rgba(231,76,60,0.08); }
+  .option-btn.wrong .option-key { color: var(--danger); }
+  .option-btn.reveal-correct { border-color: var(--success); background: rgba(46,204,113,0.05); }
+  .option-btn.reveal-correct .option-key { color: var(--success); }
+
+  .explanation-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+    display: none;
+  }
+  .explanation-box.show { display: block; }
+  .explanation-box strong { color: var(--accent); font-family: var(--mono); font-size: 12px; letter-spacing: 0.05em; }
+
+  .quiz-actions {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 24px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.12s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+  .skip-link {
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none; border: none;
+    font-family: var(--sans);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .skip-link:hover { color: var(--text); }
+
+  /* ── RESULTS SCREEN ── */
+  #screen-results { padding: 48px 0 60px; }
+
+  .result-header { margin-bottom: 40px; }
+  .result-grade {
+    font-family: var(--mono);
+    font-size: clamp(48px, 10vw, 80px);
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .result-grade.pass { color: var(--success); }
+  .result-grade.fail { color: var(--danger); }
+
+  .result-verdict {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .result-sub { font-size: 14px; color: var(--muted); }
+
+  .result-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .result-domain-grid {
+    display: flex; flex-direction: column; gap: 12px;
+    margin-bottom: 40px;
+  }
+  .rd-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 60px;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+  }
+  @media (max-width: 500px) {
+    .rd-row { grid-template-columns: 1fr 60px; }
+    .rd-label { display: none; }
+  }
+  .rd-label { color: var(--muted); font-size: 12px; }
+  .rd-bar-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .rd-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .rd-pct {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .result-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ── REVIEW SCREEN ── */
+  #screen-review { padding: 32px 0 60px; }
+
+  .review-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+  }
+
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .review-item.correct-item { border-left: 3px solid var(--success); }
+  .review-item.wrong-item { border-left: 3px solid var(--danger); }
+  .review-item.skipped-item { border-left: 3px solid var(--muted); }
+
+  .review-q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+  .review-stem { font-size: 14px; line-height: 1.6; margin-bottom: 14px; white-space: pre-wrap; }
+  .review-stem img { white-space: normal; max-width: 100%; border-radius: 4px; margin: 8px 0; }
+  .review-opts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .review-opt { font-size: 13px; line-height: 1.5; padding: 6px 10px; border-radius: 5px; display: flex; gap: 10px; }
+  .review-opt.r-correct { background: rgba(46,204,113,0.1); color: var(--success); }
+  .review-opt.r-wrong { background: rgba(231,76,60,0.1); color: var(--danger); }
+  .review-opt.r-normal { color: var(--muted); }
+  .review-result-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    float: right;
+  }
+  .tag-correct { background: rgba(46,204,113,0.15); color: var(--success); }
+  .tag-wrong { background: rgba(231,76,60,0.15); color: var(--danger); }
+  .tag-skipped { background: rgba(107,122,148,0.15); color: var(--muted); }
+
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+  }
+  .filter-btn {
+    font-size: 12px;
+    font-family: var(--mono);
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    letter-spacing: 0.04em;
+  }
+  .filter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .filter-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  
+  
+  .review-exp {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .review-exp strong {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── STUDY REPORT ── */
+  .sr-domain { margin-bottom:20px; }
+  .sr-domain-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border);
+  }
+  .sr-domain-name { font-size:14px; font-weight:600; }
+  .sr-domain-miss { font-family:var(--mono); font-size:12px; font-weight:600; }
+  .sr-section {
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:12px 16px; margin-bottom:8px;
+    display:grid; grid-template-columns:1fr auto; gap:4px 16px;
+  }
+  .sr-ch { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:0.04em; grid-column:1/-1; margin-bottom:2px; }
+  .sr-detail { font-size:13px; color:var(--text); line-height:1.4; }
+  .sr-pages { font-family:var(--mono); font-size:12px; color:var(--muted); text-align:right; align-self:end; }
+  @media(max-width:500px) {
+    .sr-section { grid-template-columns:1fr; }
+    .sr-pages { text-align:left; }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div id="screen-home" class="screen active">
+<div class="container">
+  <div class="logo-row">
+    <span class="logo-badge">220-1201</span>
+    <span class="logo-text">CompTIA A+ Core 1 · Grid Build LLC — Drill Kit</span>
+    
+  </div>
+
+  <h1 class="hero-title">A+ Core 1<br><span>Exam Simulator</span></h1>
+  <p class="hero-sub">134 questions from the Exams4sure bank. Each attempt draws up to 90 randomized questions — timed at 90 minutes, just like the real 220-1201 exam.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num">134</div>
+      <div class="stat-label">Total questions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">90</div>
+      <div class="stat-label">Per attempt</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">90<span style="font-size:16px;color:var(--muted)">min</span></div>
+      <div class="stat-label">Time limit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">675+</div>
+      <div class="stat-label">Passing score</div>
+    </div>
+  </div>
+
+  <p class="section-title">Domain coverage</p>
+  <div class="domain-legend">
+    <div class="domain-pill"><div class="domain-dot" style="background:var(--d1)"></div>D1 · Mobile Devices <span style="margin-left:4px;font-family:var(--mono);font-size:11px;">16q</span></div>
+    <div class="domain-pill"><div class="domain-dot" style="background:var(--d2)"></div>D2 · Hardware <span style="margin-left:4px;font-family:var(--mono);font-size:11px;">44q</span></div>
+    <div class="domain-pill"><div class="domain-dot" style="background:var(--d3)"></div>D3 · Networking <span style="margin-left:4px;font-family:var(--mono);font-size:11px;">46q</span></div>
+    <div class="domain-pill"><div class="domain-dot" style="background:var(--d4)"></div>D4 · Virtualization & Cloud <span style="margin-left:4px;font-family:var(--mono);font-size:11px;">12q</span></div>
+    <div class="domain-pill"><div class="domain-dot" style="background:var(--d5)"></div>D5 · HW & Network Troubleshooting <span style="margin-left:4px;font-family:var(--mono);font-size:11px;">16q</span></div>
+  </div>
+
+  <p class="section-title">Choose your mode</p>
+  <div class="mode-grid">
+    <div class="mode-card featured" onclick="startQuiz('exam')">
+      <span class="mode-badge">RECOMMENDED</span>
+      <div class="mode-icon">⏱</div>
+      <div class="mode-title">Exam Simulation</div>
+      <div class="mode-desc">90 questions · 90 minutes · No instant feedback · Results at the end</div>
+    </div>
+    <div class="mode-card" onclick="startQuiz('practice')">
+      <div class="mode-icon">📖</div>
+      <div class="mode-title">Practice Mode</div>
+      <div class="mode-desc">90 questions · No time limit · See correct answer after each question</div>
+    </div>
+    <div class="mode-card" onclick="startQuiz('quick')">
+      <div class="mode-icon">⚡</div>
+      <div class="mode-title">Quick Drill</div>
+      <div class="mode-desc">20 questions · No time limit · Instant feedback · Warm-up session</div>
+    </div>
+    <div class="mode-card" onclick="startQuiz('weak')">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-title">Weak Domain Focus</div>
+      <div class="mode-desc">D4 & D5 only · Up to 28 questions · Virtualization, Cloud & Troubleshooting</div>
+    </div>
+    <div class="mode-card" onclick="startQuiz('new450')">
+      <div class="mode-icon">🆕</div>
+      <div class="mode-title">New Questions (90+)</div>
+      <div class="mode-desc">44 questions · Q90–Q134 · Newest additions most likely to appear on exam</div>
+    </div>
+  </div>
+
+  <div id="score-history-section" style="display:none;">
+    <p class="section-title" style="margin-top:16px;">Recent attempts</p>
+    <div id="score-history"></div>
+  </div>
+
+  <div style="margin-top:32px;padding-top:16px;border-top:1px solid var(--border);">
+    <button onclick="devMode()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:0.04em;">⚙ DEV MODE — Skip to Results</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════ QUIZ ═══════════════ -->
+<div id="screen-quiz" class="screen">
+<div class="container">
+  <div class="quiz-header">
+    <div class="quiz-meta">
+      <span class="q-counter">Question <strong id="q-current">1</strong> of <strong id="q-total">90</strong></span>
+      <span class="domain-tag" id="q-domain-tag"></span>
+    </div>
+    <div class="timer-box" id="timer-box">
+      <span id="timer-icon">⏱</span>
+      <span id="timer-display">90:00</span>
+    </div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+
+  <div class="question-card">
+    <div id="multi-hint" class="multi-hint" style="display:none;">SELECT TWO</div>
+    <div class="q-stem" id="q-stem"></div>
+    <div class="options-list" id="options-list"></div>
+    <div class="explanation-box" id="explanation-box">
+      <span id="explanation-text"></span>
+    </div>
+  </div>
+
+  <div class="quiz-actions">
+    <button class="skip-link" id="btn-skip" onclick="skipQuestion()">Skip question</button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-ghost" id="btn-flag" onclick="toggleFlag()" title="Flag for review">⚑ Flag</button>
+      <button class="btn btn-primary" id="btn-submit" onclick="submitAnswer()" disabled>Submit</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" style="display:none;">Next →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════ RESULTS ═══════════════ -->
+<div id="screen-results" class="screen">
+<div class="container">
+  <div class="result-header">
+    <div class="result-grade" id="result-grade">85%</div>
+    <div class="result-verdict" id="result-verdict">You passed!</div>
+    <div class="result-sub" id="result-sub"></div>
+  </div>
+
+  <div class="result-meta" id="result-meta"></div>
+
+  <p class="section-title">Performance by domain</p>
+  <div class="result-domain-grid" id="result-domains"></div>
+
+  <p class="section-title" style="margin-top:8px;">Study recommendations</p>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Based on wrong/skipped questions · Organized by weakest domain · <em>CompTIA A+ Core 1 (220-1201)</em></p>
+  <div id="study-report"></div>
+
+  <div class="result-actions" style="margin-top:32px;">
+    <button class="btn btn-primary" onclick="showScreen('screen-home')">← New Attempt</button>
+    <button class="btn btn-ghost" onclick="showReview()">Review Answers</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════ REVIEW ═══════════════ -->
+<div id="screen-review" class="screen">
+<div class="container">
+  <div class="review-header">
+    <h2 style="font-size:20px;font-weight:600;">Answer Review</h2>
+    <button class="btn btn-ghost" onclick="showScreen('screen-results')">← Back to Results</button>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('wrong', this)">Wrong only</button>
+    <button class="filter-btn" onclick="setFilter('correct', this)">Correct only</button>
+    <button class="filter-btn" onclick="setFilter('skipped', this)">Skipped</button>
+    <button class="filter-btn" onclick="setFilter('flagged', this)">Flagged</button>
+  </div>
+
+  <div id="review-list"></div>
+</div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [{"id": 1, "stem": "Which of the following is a Bluetooth network an example of?", "options": {"A": "PAN", "B": "LAN", "C": "WAN", "D": "SAN"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "Bluetooth is a wireless technology designed for short-range communication between devices. It is a classic example of a Personal Area Network (PAN), which supports communication between devices like smartphones, headsets, keyboards, and mice within a few meters. PANs are smaller in scope compared to LANs or WANs. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 5, \"Networking Fundamentals\", page 275. A technician is working on a RAID 1 array that is apparently degraded. The technician verifies the RAM and power are both operating as expected."}, {"id": 2, "stem": "A technician is working on a RAID 1 array that is apparently degraded. The technician verifies the RAM and power are both operating as expected. Which of the following can the technician do to further isolate the issue?", "options": {"A": "Perform individual drive diagnostics.", "B": "Run the chkdsk /i command.", "C": "Rebuild the RAID array.", "D": "Reconfigure the array as RAID 0."}, "answers": ["A"], "domain": 5, "multi": false, "exp": "Adegraded RAID larray usually meansone of the drives has failed or is failing. The correctnext step is torun diagnostics on each driveto identify the faulty one. RAID 1 uses mirroring, so one good drive should still contain all the data. Option B:chkdsk checks file system integrity, not hardware drive health. Option C:Rebuilding should only occurafteridentifying and replacing a faulty drive. Option D:RAID 0 offers no redundancy and would destroy data in this context. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.5: Given a scenario, troubleshoot problems related to storage devices."}, {"id": 3, "stem": "Which of the following port numbers are associated with email traffic? (Select two).", "options": {"A": "23", "B": "25", "C": "67", "D": "110", "E": "137", "F": "443"}, "answers": ["B", "D"], "domain": 3, "multi": true, "exp": "Comprehensive and Detailed Step-by-Step Explanation: To answer this question, we need to identify the port numbers associated with email protocols used in client- server communication. Port 25 (SMTP - Simple Mail Transfer Protocol): This port is primarily used for sending emails between mail servers and from mail clients to mail servers (sending outbound mail). SMTP is an essential protocol for email traffic. Reference: CompTIA A+ Core 1 Exam Objectives (220-1201), Domain 2.5 — Explain basic wired and wireless networking concepts, including ports and protocols."}, {"id": 4, "stem": "emails and D. 110 (POP3) for retrieving emails. A customer reports that the output from their thermal receipt printer has vertical white lines. Which of the following would most likely resolve this issue?", "options": {"A": "Replacing the ink cartridge", "B": "Using the correct paper type", "C": "Installing a maintenance kit", "D": "Cleaning the heating element"}, "answers": ["D"], "domain": 2, "multi": false, "exp": "Thermal printerscreate images using aheated print headon specially coated thermal paper. Vertical white lines indicate thatpart of the heating element is dirty or blocked, preventing heat transfer to the paper. Cleaning the print head (heating element) will restore full functionality. Option A:Thermal printers donot use ink or toner, so this is not applicable. Option B: Wrong paper could cause blank output, but consistent vertical lines point to the print head. Option C:Maintenance kits are typically for laser printers, not thermal printers."}, {"id": 5, "stem": "A technician needs to confirm that desktop PCs can be deployed to a global, remote workforce. Which of the following specifications should the technician validate?", "options": {"A": "Input voltage", "B": "BIOS language support", "C": "Supply chain security", "D": "Power efficiency"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Input voltage must be validated to ensure desktop PCs can operate in different regions with varying power standards (e.g., 110V in North America vs. 220V in Europe). Failure to verify input voltage compatibility can lead to hardware damage or operational issues. Option B (BIOS language support): Incorrect. While language support may be helpful, it is not critical for hardware deployment across regions. Option C (Supply chain security): Incorrect. This refers to ensuring secure sourcing of components but does not directly impact deployment. Option D (Power efficiency): Incorrect."}, {"id": 6, "stem": "Explanation Input voltage must be validated to ensure desktop PCs can operate in different regions with varying power standards (e.g., 110V in North America vs. 220V in Europe). Failure to verify input voltage compatibility can lead to hardware damage or operational issues. Option B (BIOS language support): Incorrect. While language support may be helpful, it is not critical for hardware deployment across regions. Option C (Supply chain security): Incorrect. This refers to ensuring secure sourcing of components but does not directly impact deployment. Option D (Power efficiency): Incorrect. Power efficiency may be important for energy savings but is not relevant to regional compatibility. References:", "options": {"A": "CPU", "B": "NIC", "C": "HDD", "D": "RAM"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "ANetwork Interface Card (NIC)is the hardware responsible for network connectivity. If the NIC is failing or underperforming (e.g., due to a bad driver, hardware fault, or misconfiguration), it can causeslow or unstable network speeds. Option A (CPU):A failing CPU affects overall system performance but not specifically network speed. Option C (HDD):A slow hard drive causes application lag, but not poor network performance. Option D (RAM):Affects multitasking and speed, not network throughput. CompTIA A+ Core 1 Exam Objective Reference: Objective 3."}, {"id": 7, "stem": "Which of the following technologies best allows a phone to connect to a point-of-sale terminal for wireless payments?", "options": {"A": "Bluetooth", "B": "NFC", "C": "Wi-Fi", "D": "Cellular"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "Near-field communication (NFC) is a short-distance wireless communication method widely used in mobile payment systems like Apple Pay and Google Pay. Simply placing the device near a compatible terminal initiates the payment process. Reference: \"Mike Meyers' CompTIA A+ Certification All-in-One Exam Guide\" —- Chapter 24, page 1022. Which of the following provides electricity to devices through network cables? A. Edge router B. PoE switch C. Access point D. Patch panel"}, {"id": 8, "stem": "Which of the following provides electricity to devices through network cables?", "options": {"A": "Edge router", "B": "PoE switch", "C": "Access point", "D": "Patch panel"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "A PoE (Power over Ethernet) switch transmits both data and electrical power over Ethernet cables to devices like wireless access points or VoIP phones. This is especially useful in areas where separate power sources are not available. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 5, pages 319-321. Which of the following cloud models exclusively utilizes a local data center? A. Private B. Public C. Hybrid D. Community"}, {"id": 9, "stem": "Which of the following cloud models exclusively utilizes a local data center?", "options": {"A": "Private", "B": "Public", "C": "Hybrid", "D": "Community"}, "answers": ["A"], "domain": 4, "multi": false, "exp": "APrivate Cloudis operated solely for a single organization. It ishosted on-premises or in a dedicated off-site data center, giving the company full control over data, security, and compliance — often hosted in theorganization’s own local data center. Option B (Public):Hosted by third-party providers and shared by multiple clients. Option C (Hybrid):Combines private and public cloud resources. Option D (Community):Shared by several organizations with similar goals. CompTIA A+ Core 1 Exam Objective Reference: Objective 4.1: Compare and contrast cloud computing concepts."}, {"id": 10, "stem": "Which of the following is the ability to automatically increase and decrease instances based on demand?", "options": {"A": "Availability", "B": "Scalability", "C": "Multitenancy", "D": "Elasticity"}, "answers": ["D"], "domain": 4, "multi": false, "exp": "Elasticity in cloud computing refers to the ability of a system to automatically allocate and release resources (such as CPU, RAM, or virtual machines) as workload demands change. This feature is key to ensuring that resources are used efficiently without manual intervention. Reference: CompTIA A+ Certification Exam Core 1 Objectives — Domain 4.0 Virtualization and Cloud Computing — Objective 4.2: Summarize cloud computing concepts. Which of the following utilizes specialized ports on a laptop to expand the local connection options? A. NFC adapter B. Docking station C. Port replicator D."}, {"id": 11, "stem": "Computing — Objective 4.2: Summarize cloud computing concepts. Which of the following utilizes specialized ports on a laptop to expand the local connection options?", "options": {"A": "NFC adapter", "B": "Docking station", "C": "Port replicator", "D": "USB dongle"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "Adocking stationconnects to a laptop’sproprietary port or USB-C/Thunderbolt, providing access tomultiple additional ports(USB, Ethernet, video, audio, etc.). It allows users to transform a laptop into a full desktop workstation. Option A (NFC adapter):Used for short-range communication, not port expansion. Option C (Port replicator):Similar to a dock but usually less powerful and often lacks charging or video output. Option D (USB dongle):Adds a single function (like Wi-Fi or storage), not full port expansion. CompTIA A+ Core 1 Exam Objective Reference: Objective 1."}, {"id": 12, "stem": "A technician is setting up a scan-to-SMB function on a multifunction printer. Which of the following connection types should the technician configure?", "options": {"A": "Email server", "B": "SFTP connection", "C": "Network share", "D": "Print services"}, "answers": ["C"], "domain": 1, "multi": false, "exp": "The scan-to-SMB feature allows the printer to send scanned documents to a shared folder (SMB share) on the network. Setting up a network share enables the device to securely and conveniently save files for user access. Reference: CompTIA A+ Certification Exam Core 1 Objectives — Domain 2.0 Networking — Objective 2.7: Compare and contrast internet connection types, network types, and their features. Users are complaining that the audio from a presenter is choppy and unintelligible Which of the following is causing the issue? A. Webcam B. Digitizer C. inverter D. Microphone"}, {"id": 13, "stem": "Compare and contrast internet connection types, network types, and their features. Users are complaining that the audio from a presenter is choppy and unintelligible Which of the following is causing the issue?", "options": {"A": "Webcam", "B": "Digitizer", "C": "inverter", "D": "Microphone"}, "answers": ["D"], "domain": 1, "multi": false, "exp": "Choppy or unintelligible audio is typically caused by issues with the microphone, such as poor quality, hardware defects, or misconfiguration. Why Not A (Webcam): The webcam handles video, not audio. Why Not B (Digitizer): A digitizer relates to touchscreens, not audio. Why Not C (Inverter): Inverters manage power for displays, not audio. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.6, audio troubleshooting. A customer reports that a text-only document prints with unrecognizable characters. The print preview correctly displays the document."}, {"id": 14, "stem": "A customer reports that a text-only document prints with unrecognizable characters. The print preview correctly displays the document. Which of the following is the most likely cause of the issue?", "options": {"A": "Outdated firmware", "B": "Incorrect driver", "C": "Bad toner cartridge", "D": "Corrupted document file"}, "answers": ["B"], "domain": 5, "multi": false, "exp": ""}, {"id": 15, "stem": "Which of the following network services is used to assign an IP address to a network host?", "options": {"A": "DHCP", "B": "DNS", "C": "LDAP", "D": "SMTP"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "DHCP (Dynamic Host Configuration Protocol) is the service used to automatically assign IP addresses to network hosts. It dynamically manages the distribution of IP addresses and configuration details (like subnet mask, gateway, and DNS servers), ensuring no two devices are assigned the same address on the network. Option B (DNS): Incorrect. DNS translates domain names into IP addresses but does not assign them. Option C (LDAP): Incorrect. LDAP is a protocol used for accessing and maintaining directory services, such as user information and permissions. Option D (SMTP): Incorrect."}, {"id": 16, "stem": "Explanation DHCP (Dynamic Host Configuration Protocol) is the service used to automatically assign IP addresses to network hosts. It dynamically manages the distribution of IP addresses and configuration details (like subnet mask, gateway, and DNS servers), ensuring no two devices are assigned the same address on the network. Option B (DNS): Incorrect. DNS translates domain names into IP addresses but does not assign them. Option C (LDAP): Incorrect. LDAP is a protocol used for accessing and maintaining directory services, such as user information and permissions. Option D (SMTP): Incorrect. SMTP is used for sending and receiving email, not for IP address assignment. References:", "options": {"A": "EDR", "B": "VPN", "C": "MDM", "D": "SaaS"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Mobile Device Management (MDM) allows IT departments to enforce compliance controls, such as restricting the installation of unapproved software, on laptops and mobile devices. Why Not A (EDR): Endpoint Detection and Response focuses on detecting and mitigating security threats, not compliance controls. Why Not B (VPN): Virtual Private Networks provide secure connections but do not enforce software installation policies. Why Not D (SaaS): Software as a Service refers to software delivery models and does not enforce compliance controls. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2."}, {"id": 17, "stem": "A company needs to develop a disaster recovery solution based on virtual machines. Which of the following service models is the most suitable?", "options": {"A": "Infrastructure as a Service", "B": "Security as a Service", "C": "Platform as a Service", "D": "Software as a Service"}, "answers": ["A"], "domain": 4, "multi": false, "exp": "Infrastructure as a Service (IaaS)providesvirtualized computing resources over the internetsuch as servers, storage, and networking. It allows a business to quickly spin up virtual machines and is ideal fordisaster recoveryand scalable IT infrastructure needs. Option B:SecaaS focuses on cloud-delivered security, not infrastructure. Option C:PaaS offers development environments, not full virtual infrastructure. Option D:SaaS delivers applications over the internet (e.g., email, CRM) — not for disaster recovery. CompTIA A+ Core | Exam Objective Reference: Objective 4."}, {"id": 18, "stem": "Which of the forming connector types would best suit a company that experiences a large volume of internet traffic?", "options": {"A": "USB 3.1", "B": "Quad-shielded RG11 coax", "C": "SATA3.0", "D": "Unshielded plenum RJ45"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "RGI11 coaxial cable with quad shielding is designed to handle large volumes of internet traffic, providing excellent resistance to interference and high bandwidth capacity. Why Not A (USB 3.1): USB 3.1 is used for connecting peripherals, not for high-volume internet traffic. Why Not C (SATA3.0): SATA is used for internal data storage connections, not for network traffic. Why Not D (Unshielded plenum RJ45): While RJ45 cables are commonly used, unshielded cables are prone to interference and are not ideal for high-volume traffic. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3."}, {"id": 19, "stem": "Which of the following best represents the purpose of NFC?", "options": {"A": "Wired connections between several devices", "B": "Short-distance wireless connections between two devices", "C": "Wireless connections between multiple devices at once", "D": "Direct connection of two computers for file sharing"}, "answers": ["B"], "domain": 1, "multi": false, "exp": "NFC (Near-Field Communication) is a subset of RFID technology designed for very short-range wireless communication, typically within a few centimeters. It is primarily used for contactless transactions, like mobile payments, and can also support peer-to-peer data exchanges. NFC operates at 13.56 MHz and enables devices to communicate when placed near each other. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 7, \"Wireless and SOHO Networks\", page 400. A technician receives a tablet that looks like it has a bulge inside."}, {"id": 20, "stem": "A technician receives a tablet that looks like it has a bulge inside. The bulge is pushing the screen away from the backplate. The tablet still turns on when it is plugged in, but the screen looks damaged and turns off when unplugged. Which of the following is the most likely cause of this issue?", "options": {"A": "Malfunctioning power supply", "B": "Damaged charge port", "C": "Deprecated battery", "D": "Broken screen"}, "answers": ["C"], "domain": 5, "multi": false, "exp": "Abulging tablet casingis a classic sign of aswollen lithium-ion battery, often caused by age, overheating, or overcharging. This is adangerous condition, as swollen batteries can rupture or catch fire. It also explains why the tablet only works when plugged in — the battery is no longer holding a charge. Option A:Power supply issues wouldn’t cause physical bulging. Option B:A bad charge port wouldn’t cause screen damage or physical distortion. Option D:A broken screen could cause display issues, but not the bulging chassis. CompTIA A+ Core 1 Exam Objective Reference: Objective 1."}, {"id": 21, "stem": "Which of the following devices is designed to monitor and filter incoming and outgoing network traffic?", "options": {"A": "Switch", "B": "Access point", "C": "Firewall", "D": "Hub"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "A firewall monitors and filters incoming and outgoing network traffic based on security rules, protecting the network from unauthorized access and threats. Why Not A (Switch): A switch connects devices within a network but does not monitor or filter traffic. Why Not B (Access point): An access point provides Wi-Fi connectivity but does not filter traffic. Why Not D (Hub): A hub simply broadcasts data to all connected devices without filtering traffic. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.2, network security concepts."}, {"id": 22, "stem": "Which of the following display characteristics would be most important to ensure screen images appear the same as printed output?", "options": {"A": "Color gamut", "B": "Pixel density", "C": "Refresh rate", "D": "Resolution"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Color gamut refers to the range of colors a display can accurately reproduce. For tasks like graphic design or photo editing, ensuring the screen's colors match the printed output is critical. Monitors with wide and accurate color gamuts (e.g., Adobe RGB) are preferred for these applications. Option B (Pixel density): Incorrect. Pixel density affects image sharpness, not color accuracy. Option C (Refresh rate): Incorrect. Refresh rate impacts motion smoothness but is unrelated to color matching. Option D (Resolution): Incorrect."}, {"id": 23, "stem": "Explanation Color gamut refers to the range of colors a display can accurately reproduce. For tasks like graphic design or photo editing, ensuring the screen's colors match the printed output is critical. Monitors with wide and accurate color gamuts (e.g., Adobe RGB) are preferred for these applications. Option B (Pixel density): Incorrect. Pixel density affects image sharpness, not color accuracy. Option C (Refresh rate): Incorrect. Refresh rate impacts motion smoothness but is unrelated to color matching. Option D (Resolution): Incorrect. Resolution determines clarity and detail but does not influence color accuracy. References:", "options": {"A": "Enable the module in the UEFI BIOS.", "B": "Install an HSM in the computer.", "C": "Perform a clean Install of the new Windows version.", "D": "Implement BitLocker on the computer."}, "answers": ["A"], "domain": 2, "multi": false, "exp": "TPM 2.0 (Trusted Platform Module) is often disabled by default in the UEFI BIOS. Enabling it is necessary to meet the requirements for certain Windows installations, including Windows 11. Why Not B (Install an HSM): A Hardware Security Module (HSM) is a separate device used for cryptographic functions and is not related to TPM on the motherboard. Why Not C (Perform a clean install): A clean installation will not bypass the TPM 2.0 requirement. Why Not D (Implement BitLocker): BitLocker requires TPM but does not resolve its absence or lack of activation."}, {"id": 24, "stem": "A customer reports a problem connecting to network resources. After asking open-ended questions, the technician determines the issue likely exists on the remote server. Which of the following should the technician do next?", "options": {"A": "Document the findings.", "B": "Test the theory", "C": "Gather information", "D": "Establish a plan of action"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "After determining the issue is likely on the remote server, the technician should test the theory to confirm the root cause before proceeding. Why Not A (Document the findings): Documentation comes after confirming the issue. Why Not C (Gather information): Information gathering is already completed. Why Not D (Establish a plan of action): This is done after confirming the issue. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 3.1, troubleshooting methodology. When installing a network printer, a technician needs to ensure the printer is available after a network is restarted."}, {"id": 26, "stem": "A customer reports that a workstation has no internet connectivity. A technician confirms the port is disabled. Which of the following is most likely responsible for the issue?", "options": {"A": "Patch panel", "B": "Physical NIC", "C": "Managed switch", "D": "Stand-alone firewall"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "A managed switch allows an administrator to enable or disable individual ports as part of network security and management. If a port on a managed switch has been disabled, the device connected to that port will lose connectivity, which matches the scenario described. Reference: CompTIA A+ Certification Exam Core 1 Objectives — Domain 2.0 Networking — Objective 2.2: Compare and contrast common networking hardware devices. A user routinely connects and disconnects multiple devices from a laptop."}, {"id": 27, "stem": "Compare and contrast common networking hardware devices. A user routinely connects and disconnects multiple devices from a laptop. Which of the following options should a technician recommend to facilitate ease of user mobility? 17 of", "options": {"A": "Serial interfaces", "B": "Docking station", "C": "Network switch", "D": "USB hub"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Reasoning: A docking station is designed to provide a central connection point for multiple peripherals, such as monitors, keyboards, mice, and network cables. It allows users to quickly connect or disconnect all devices by simply docking or undocking their laptop, improving mobility and reducing wear and tear on individual ports. Why the Other Options Are Incorrect: A. Serial interfaces: Serial interfaces are outdated and rarely used in modern laptops or peripherals. They are not practical for facilitating the connection of multiple devices. C."}, {"id": 28, "stem": "A financial institution needs a secure way to protect encryption keys used for unlocking chips on its credit cards Which of the following should the institution use?", "options": {"A": "TLS", "B": "AMD", "C": "HSM", "D": "ARM"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "A Hardware Security Module (HSM) securely manages cryptographic keys, including those used to protect credit card chips. Why Not A (TLS): TLS secures data in transit, not encryption key storage. Why Not B (AMD): AMD refers to processors, not security modules. Why Not D (ARM): ARM is a processor architecture, not a cryptographic security solution. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.5, cryptographic hardware. A user experiences a random BSOD while using a computer, but the operating system recovers as expected."}, {"id": 29, "stem": "A user experiences a random BSOD while using a computer, but the operating system recovers as expected. Which of the following symptoms would indicate the issue is related to RAM?", "options": {"A": "Wrong BIOS configurations", "B": "Continuous reboots", "C": "Distended capacitors", "D": "POST code beeps"}, "answers": ["D"], "domain": 5, "multi": false, "exp": "D. POST Code Beeps: During the Power-On Self-Test (POST), the BIOS performs checks on system hardware, including RAM. If the RAM is faulty, POST may produce a series of beep codes indicating memory issues. These beep codes are often the first sign of RAM-related problems, especially if the BSOD occurs randomly. Incorrect Options: A. Wrong BIOS configurations: Incorrect BIOS settings may cause boot errors, but they are less likely to cause random BSODs. B. Continuous reboots: Continuous reboots could result from multiple hardware or software issues but do not specifically point to RAM. C."}, {"id": 30, "stem": "motherboard issues. A network administrator must ensure that a printer will still be assigned a specific IP address even if all addresses are depleted. Which of the following network configuration concepts is this describing?", "options": {"A": "VLAN", "B": "Lease", "C": "Reservation", "D": "Exclusion"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "A DHCP reservation binds a specific MAC address to an IP address so the device always receives the same IP from the DHCP server. This ensures network devices like printers maintain consistent connectivity and availability even when the IP pool is low. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 18, page 1252. A technician receives a S.M.A.R.T. error on a PC. When the technician presses the Esc key, the PC continues to turn on without any further issues. Which of the following should the technician do next? A. Replace the HDD. B. Update the PC's BIOS. C."}, {"id": 31, "stem": "A technician receives a S.M.A.R.T. error on a PC. When the technician presses the Esc key, the PC continues to turn on without any further issues. Which of the following should the technician do next?", "options": {"A": "Replace the HDD.", "B": "Update the PC's BIOS.", "C": "Close the ticket.", "D": "Change the NIC."}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: S.M.A.R.T. (Self-Monitoring, Analysis, and Reporting Technology): S.M.A.R.T. is a monitoring system integrated into modern HDDs and SSDs that detects and reports on various indicators of drive health and reliability. A S.M.A.R.T. error indicates that the drive is showing signs of impending failure, even if the PC continues to boot and work normally for the time being. Next Steps: The appropriate action is to replace the hard drive (HDD) because a $.M.A.R.T. error is an early warning of possible hardware failure."}, {"id": 32, "stem": "and RAID arrays. The display in a conference room has a ghost image that does not match the presentation Which of the following would test resolve the issue?", "options": {"A": "Adjust the color settings.", "B": "Correct the keystone.", "C": "Increase the brightness levels", "D": "Replace the monitor."}, "answers": ["B"], "domain": 2, "multi": false, "exp": "B. Correct the keystone: A keystone correction adjusts the image shape when a projector is angled either up or down. When a projector is not positioned directly perpendicular to the screen, the image becomes distorted or offset. Correcting the keystone will resolve alignment issues, ensuring that the presentation matches the display. Incorrect Options: A. Adjust the color settings: This is used for improving color balance and has no impact on ghosting or mismatched images. C."}, {"id": 33, "stem": "Which of the following would prevent a virtual machine from communicating with any endpoints on a network or the internet?", "options": {"A": "VDI", "B": "Private cloud"}, "answers": ["C"], "domain": 4, "multi": false, "exp": "Asandboxis an isolated virtual environment used totest or run applications securelywithout risk to the host or network, It prevents the VM from communicating with external systems, making it ideal for testing malware or suspicious software. Option A (VDI):Virtual Desktop Infrastructure allows network communication; it does not restrict it. Option B (Private cloud):Refers to a cloud deployment model, not a communication barrier. Option D (Type 1 hypervisor):Runs VMs directly on hardware and doesnotinherently block communication. CompTIA A+ Core 1 Exam Objective Reference: Objective 4."}, {"id": 34, "stem": "A technician has just installed a new SSD into a computer, but the drive is not appearing. Which of the following is most likely the reason's?", "options": {"A": "The SSD is faulty and should be replaced by the manufacturer", "B": "The SSD has not been properly formatted and is not readable", "C": "The SSD is incompatible with the motherboard", "D": "The SSD has not boon installed properly and should be reseated"}, "answers": ["D"], "domain": 2, "multi": false, "exp": "Improper seating is the most common reason an SSD isn’t recognized. Ensuring it is correctly connected resolves the issue. Why Not A (Faulty SSD): A faulty SSD is possible but less likely than an installation issue. Why Not B (Not formatted): Formatting affects data usability, not drive detection. Why Not C (Incompatibility): SSD compatibility issues are rare with modern hardware. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.3, storage troubleshooting. A support technician receives a call stating that a user has added a device to the network."}, {"id": 35, "stem": "A support technician receives a call stating that a user has added a device to the network. The user used the same configurations from another workstation. When both workstations are turned on, neither can access the network reliably. Which of the following is the most likely cause of the issue?", "options": {"A": "The new computer has a duplicate IP address.", "B": "The DNS server is registering both hostnames.", "C": "The network cable was improperly terminated.", "D": "The security on the switchport needs to be reset."}, "answers": ["A"], "domain": 3, "multi": false, "exp": "If two devices have thesame static IP address, anIP conflictoccurs. This results in both devices being intermittently disconnected or unable to communicate on the network. It’s a common mistake when copying configurations manually. Option B:DNS conflicts wouldn’t cause total disconnection — and wouldn't occur just from copying IP settings. Option C:A cable issue would only affect one workstation. Option D:Switchport security issues wouldn't affect both machines simultaneously unless port security was configured very specifically. CompTIA A+ Core 1 Exam Objective Reference: Objective 2."}, {"id": 36, "stem": "A user prints a job from a laser printer. The user wipes the page, and the words and images come off of it. The technician replaces the toner cartridge, but the issue persists. Which of the following components should the technician replace next?", "options": {"A": "Fuser", "B": "Drum", "C": "Developer roller", "D": "Discharge lamp"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Inlaser printers, thefuser unitis responsible formelting the toner onto the paperusing heat and pressure. If the toner rubs off easily, it's a clear sign thefuser is failing or not heating properly. Replacing the fuser will ensure the toner bonds correctly to the paper. Option B (Drum):Transfers the image, but doesn't fuse the toner. Option C (Developer roller):Applies toner to the drum — wouldn’t cause toner to rub off. Option D (Discharge lamp):Prepares the drum for a new image; not related to toner adhesion. CompTIA A+ Core 1 Exam Objective Reference: Objective 3."}, {"id": 37, "stem": "Which of the following cable types is the most suitable for delivering 10Gb speeds for distances over 328ft (100m) but under 1,312ft (400m)?", "options": {"A": "Multimode fiber", "B": "Single-mode fiber", "C": "Cat 6a", "D": "Cat 6"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: When delivering 10Gbps speeds over long distances, fiber optic cables are the best choice. Here’s the breakdown: A. Multimode Fiber (Correct Answer): Multimode fiber is designed for relatively short to medium distances (up to 1,312 feet or 400 meters) while supporting high-speed data transfer (10Gbps and above). It uses LED light sources and is cost-effective for environments like data centers or within buildings. For the specified distance of over 328ft but under 1,312ft, multimode fiber is the most suitable option. Incorrect Options: B."}, {"id": 38, "stem": "characteristics, including fiber optic cables. Which of the following is the best to use when testing a file for potential malware?", "options": {"A": "Multitenancy", "B": "Test development", "C": "Cross-platform virtualization", "D": "Sandbox"}, "answers": ["D"], "domain": 3, "multi": false, "exp": "A sandbox is a secure, isolated environment used to test potentially harmful software or code. It prevents the software from affecting the main system, allowing safe malware testing. Thismethod is standard in cybersecurity best practices. Reference: \"CompTIA A+ Certification All-in-One Exam Guide\" by Mike Meyers — Chapter 28, page 1230. A company wants to save printing costs by restricting network printer use. The company implements a solution that requires employees to authenticate to the printer to release print jobs Which of the following has the company implemented? A."}, {"id": 39, "stem": "A company wants to save printing costs by restricting network printer use. The company implements a solution that requires employees to authenticate to the printer to release print jobs Which of the following has the company implemented?", "options": {"A": "Access control list", "B": "Audit logging", "C": "Badging", "D": "Print server"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Badging is a form of authentication that requires employees to use a badge or ID card to release print jobs. This solution reduces unnecessary printing by ensuring only authorized users print. Why Not A (Access control list): While ACLs manage permissions, they are not used for physical authentication at printers. Why Not B (Audit logging): Audit logs track actions but do not restrict printer access. Why Not D (Print server): A print server manages print jobs but doesn’t enforce authentication. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.5, authentication mechanisms."}, {"id": 40, "stem": "A customer needs to install a new printer in their network. The customer reports that users had intermittent connectivity issues with previous printers. Which of the following should the technician configure on the new printer to prevent this issue?", "options": {"A": "Gateway IP address", "B": "DHCP IP address", "C": "Static IP address"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Intermittent connectivity issues with network printers are commonly caused by changing IP addresses when using DHCP. Assigning a static IP address ensures that the printer is always reachable at the same IP address by client machines. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 4, \"Printers and Multifunction Devices\", page 241. Which of the following should a technician use to terminate a Cat 6 cable to a patch panel? A. Punchdown tool B. Crimper C. Toner probe D. Network tap"}, {"id": 41, "stem": "Which of the following should a technician use to terminate a Cat 6 cable to a patch panel?", "options": {"A": "Punchdown tool", "B": "Crimper", "C": "Toner probe", "D": "Network tap"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "A punchdown tool is specifically used to insert wires into a punchdown block in patch panels, which is typical for Cat 6 and similar cabling. It ensures a secure and correct connection by pushing the wire into a metal groove that slices the insulation. Reference: \"CompTIA A+ Certification All-in-One Exam Guide\" by Mike Meyers — Chapter 18, page 758. Which of the following tools is best to track where an Ethernet cable is patched? A. Crimper B. Punchdown tool C. Cable stripper D. Toner probe"}, {"id": 42, "stem": "Which of the following tools is best to track where an Ethernet cable is patched?", "options": {"A": "Crimper", "B": "Punchdown tool", "C": "Cable stripper", "D": "Toner probe"}, "answers": ["D"], "domain": 3, "multi": false, "exp": "Atoner probe(also known as a tone generator and probe) is the best tool fortracing and identifying cablesin a patch panel or wall jack. The tone generator sends a signal through the wire, and the probe helps locate the cable by detecting the tone. Option A (Crimper):Used to attach connectors (e.g., RJ-45), not for tracing cables. Option B (Punchdown tool):Used to terminate cables into patch panels or keystone jacks. Option C (Cable stripper):Used to remove insulation, not to trace cables. CompTIA A+ Core 1 Exam Objective Reference: Objective 5."}, {"id": 43, "stem": "option to clear existing TPM keys. Which of the following would most likely happen if the TPM is cleared?", "options": {"A": "Encrypted hard drives would probably not be accessible.", "B": "All security certificates would need to be reinstalled from trusted roots.", "C": "The device would need to be reenrolled in the MDM platform", "D": "The laptop would need to be registered to the domain as a new client."}, "answers": ["A"], "domain": 1, "multi": false, "exp": "The Trusted Platform Module (TPM) is a hardware-based security feature used to store cryptographic keys, such as those used for encryption, authentication, or device identification. It plays a critical role in ensuring secure operations for encrypted drives, BitLocker, and secure boot processes. Clearing TPM keys involves wiping all stored cryptographic data, which can lead to several consequences depending on what the TPM was being used for. Let’s break it down: Correct Answer: A. Encrypted hard drives would probably not be accessible."}, {"id": 44, "stem": "). This question tests understanding of TPM functionality, encryption technologies, and secure device configurations. A user returns from a trip and discovers a computer that is connected to the LAN times out intermittently Upon investigation, a technician finds the RJ45 pin is not property terminated Which of the following networking tools is most appropriate to fix the issue?", "options": {"A": "Toner probe", "B": "Cable tester", "C": "Punchdown", "D": "Crimper"}, "answers": ["D"], "domain": 2, "multi": false, "exp": "D. Crimper: A crimper is used to terminate an RJ45 cable properly by attaching the connector to the twisted-pair wires. If the termination is not done correctly, the connection will be intermittent or fail entirely. Incorrect Options: A. Toner probe: Used to locate cables or trace their path, not for terminating RJ45 connectors. B. Cable tester: Useful for testing connectivity but does not fix termination issues. C. Punchdown: Used to connect wires to a patch panel or keystone jack, not for RJ45 connectors."}, {"id": 46, "stem": "A technician is troubleshooting stylus issues on identical, company-provided tablets. Users can purchase their own accessories. Some users have no issues, but others report that their styluses charge intermittently and die frequently. Which of the following is the most likely cause of this issue?", "options": {"A": "Certain cases are causing charging issues.", "B": "The tablets need to be updated.", "C": "Some of the tablets have manufacturing defects.", "D": "The malfunctioning styluses need firmware updates."}, "answers": ["A"], "domain": 5, "multi": false, "exp": "The most likely cause isthird-party or ill-fitting casesobstructing the contact between the stylus and the tablet charging mechanism. Some cases may not be designed with stylus charging in mind, particularly if users are purchasing their own accessories. Option B:A software update might fix OS-related issues, but would not typically affect physical charging. Option C:If some devices had defects, the issue would likely be consistent, not isolated to some users. Option D:Firmware issues could be a factor but are less likely than physical obstructions when users are using different accessories."}, {"id": 47, "stem": "A user reports slow internet browsing. The technician finds high CPU and memory usage, and pop-ups occur every minute. Which of the following should the technician do next?", "options": {"A": "Escalate to the network team to check end-to-end connectivity.", "B": "Download and install the latest drivers.", "C": "Update the anti-malware signatures and scan the system.", "D": "Check the wireless settings and validate the DHCP configuration."}, "answers": ["C"], "domain": 2, "multi": false, "exp": "High resource usage along with frequentpop-upsare strong signs of amalware infection. The next logical step is toupdate anti-malware definitionsandrun a full scanto detect and remove threats. Option A:Network performance is likely not the root cause — local system behavior points to malware. Option B:Drivers affect hardware functionality; they don’t resolve malware-related slowness. Option D:DHCP issues usually cause IP conflicts or no network access, not CPU spikes or pop-ups. CompTIA A+ Core 1 Exam Objective Reference: Objective 4."}, {"id": 48, "stem": "A user reports that the printouts from a laser printer have lines and smudges on them. The printer is also intermittently misfeeding the paper. Which of the following components should a technician replace to address this issue?", "options": {"A": "Fuser", "B": "Maintenance kit", "C": "Corona wire", "D": "Toner cartridge"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Amaintenance kitfor a laser printer often includesrollers, fuser, and other partsthat wear out over time. If the printer issmudging and misfeeding, it's a sign thatmultiple components are failing, which a maintenance kit is designed to resolve. Option A (Fuser):May cause smudging if it's not heating correctly, but it won’t resolve paper misfeeds alone. Option C (Corona wire):Can cause poor image quality if dirty but doesn’t affect paper feeding. Option D (Toner cartridge):Can cause streaks if defective, but not paper feed issues. CompTIA A+ Core 1 Exam Objective Reference: Objective 3."}, {"id": 49, "stem": "A technician needs to troubleshoot a user's smartphone that will not connect to its wireless provider's service. Which of the following should the technician check first?", "options": {"A": "SIM card", "B": "Network settings", "C": "Subscription plan", "D": "Bluetooth connection"}, "answers": ["C"], "domain": 1, "multi": false, "exp": ""}, {"id": 50, "stem": "A technician is troubleshooting issues occurring on a user's mobile device. Applications and the OS have slow response times, even when performing simple tasks, such as writing an email. Additionally, new applications occasionally fail to launch. Which of the following should the technician do next?", "options": {"A": "Move the device to a room with a colder temperature.", "B": "Close unnecessary programs.", "C": "Reset to factory default settings.", "D": "Check the battery health of the device."}, "answers": ["B"], "domain": 5, "multi": false, "exp": "The symptoms — slow response and failed app launches — indicate that thedevice's memory or processing resources are overutilized. Closing unnecessary apps can free up RAM and CPU resources, improving performance. Option A:Overheating may cause sluggishness, but that’s not indicated here. Option C:Factory reset is a last resort, not the next logical step. Option D:Battery health would affect uptime, not system speed. CompTIA A+ Core 1 Exam Objective Reference: Objective 1.6: Given a scenario, configure basic mobile device network connectivity and application support."}, {"id": 51, "stem": "Which of the following could a user employ to maximize module bandwidth when selecting memory for a high-end gaming computer?", "options": {"A": "Error correction", "B": "RAM voltage", "C": "Channel configuration", "D": "Physical module size"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Channel configuration(e.g.,dual-channel,quad-channel) determines how memory modules communicate with the memory controller. Usingmatched pairs in dual- or quad-channel setupscan significantlyincrease memory bandwidth, improving performance — especially for gaming and video-intensive tasks. Option A (Error correction):ECC RAM is used in servers for reliability, not performance or gaming. Option B (RAM voltage):Affects compatibility and overclocking but not bandwidth. Option D (Physical size):Refers to module form factor (e.g., DIMM, SO-DIMM) and does not impact bandwidth."}, {"id": 52, "stem": "Which of the following ports is commonly used for remote desktop connections?", "options": {"A": "137", "B": "445", "C": "3389", "D": "4443"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Port 3389 is used by the Remote Desktop Protocol (RDP) for remote desktop connections in Windows environments. This port allows remote control and management of systems across the network. Reference: CompTIA A+ Certification Exam Core 1 Objectives — Domain 2.0 Networking — Objective 2.2: Compare and contrast common networking hardware devices and ports. Question #:53 - (Exam Topic 1)- [Hardware] Which of the following types of RAM is typically used in servers? A. SODIMM B. Rambus C. DDR3 D. ECC"}, {"id": 53, "stem": "Compare and contrast common networking hardware devices and ports. Question #:53 - (Exam Topic 1)- [Hardware] Which of the following types of RAM is typically used in servers?", "options": {"A": "SODIMM", "B": "Rambus", "C": "DDR3", "D": "ECC"}, "answers": ["D"], "domain": 2, "multi": false, "exp": "ECC (Error-Correcting Code) RAM is commonly used in servers to provide error detection and correction, improving reliability in critical systems. It is designed to detect and correct single-bit errors, ensuring data integrity in environments where stability is paramount. Option A (SODIMM): Incorrect. SODIMM is typically used in laptops, not servers. Option B (Rambus): Incorrect. Rambus is an outdated RAM type and not commonly used today. Option C (DDR3): Incorrect. While DDR3 is a type of RAM, it is not specific to servers and does not provide error correction."}, {"id": 54, "stem": "Explanation ECC (Error-Correcting Code) RAM is commonly used in servers to provide error detection and correction, improving reliability in critical systems. It is designed to detect and correct single-bit errors, ensuring data integrity in environments where stability is paramount. Option A (SODIMM): Incorrect. SODIMM is typically used in laptops, not servers. Option B (Rambus): Incorrect. Rambus is an outdated RAM type and not commonly used today. Option C (DDR3): Incorrect. While DDR3 is a type of RAM, it is not specific to servers and does not provide error correction. References:", "options": {"A": "Thermal printer", "B": "Inkjet printer", "C": "Dot matrix printer", "D": "Laser printer"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Inkjet printers are the best choice for a small company seeking full-color printing with a minimal initial cost. While they have higher operating costs (due to ink), they are affordable and capable of high-quality color output. Why Not A (Thermal printer): Thermal printers are not designed for color printing and are typically used for labels or receipts. Why Not C (Dot matrix printer): Dot matrix printers are outdated, noisy, and do not support full-color printing."}, {"id": 55, "stem": "A help desk technician inspects a laptop keyboard because a single key has stopped working. The technician checks the keyboard for debris. Which of the following actions should the technician do next to troubleshoot the issue cost-effectively?", "options": {"A": "Replace the keyboard.", "B": "Replace the key switch", "C": "Replace the circuit board.", "D": "Replace the keycap"}, "answers": ["B"], "domain": 5, "multi": false, "exp": "If only one key is not functioning and debris has been checked, replacing the individual keycap is the most cost-effective next step. It's a simple, low-cost option before considering more extensive repairs like replacing the entire keyboard. Reference: \"CompTIA A+ Complete Practice Tests\" by Jeff T. Parker — Chapter 1, Question 10, page 8. Which of the following cloud models would multiple organizations in the same industry most likely use? A. Public B. Hybrid C. Community D. Private"}, {"id": 56, "stem": "Which of the following cloud models would multiple organizations in the same industry most likely use?", "options": {"A": "Public", "B": "Hybrid", "C": "Community", "D": "Private"}, "answers": ["C"], "domain": 4, "multi": false, "exp": "ACommunity Cloudis designed for use by several organizations with shared concerns (e.g., security, compliance, jurisdiction). It’s common in industries like healthcare or finance where multiple entities benefit from a common infrastructure with shared policies. Option A (Public):Open to general public or large industry group — less secure. Option B (Hybrid):Mix of public and private — does not imply industry collaboration. Option D (Private):Dedicated to a single organization. CompTIA A+ Core 1 Exam Objective Reference: Objective 2.1: Compare and contrast cloud computing concepts."}, {"id": 57, "stem": "A customer reports their tablet was recently dropped on the ground. The tablet has a small crack in one corner of the display, and it does not charge when plugged in. Which of the following should a technician do first?", "options": {"A": "Perform a hard restart.", "B": "Replace the battery", "C": "Inspect the USB-C port for damage", "D": "Run diagnostics on the digitizer"}, "answers": ["C"], "domain": 1, "multi": false, "exp": "Physical damage from dropping a tablet may often affect ports or connectors. Before taking deeper diagnostic or replacement steps, it's important to visually inspect the USB-C charging port for damage or debris. If the port is damaged, charging issues can occur regardless of battery health. Reference: \"CompTIA A+ All-in-One Exam Guide, 11th Edition\" by Mike Meyers — Chapter 25, \"Maintaining and Securing Mobile Devices\", page 879. Which of the following is designed to be used in commercial spaces? A. USB 3.1 Gen2 B. Straight tip fiber connector C. Plenum cabling D. Cat 8"}, {"id": 58, "stem": "Which of the following is designed to be used in commercial spaces?", "options": {"A": "USB 3.1 Gen2", "B": "Straight tip fiber connector", "C": "Plenum cabling", "D": "Cat 8"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Plenum cabling is designed for use in commercial spaces where cables run through air ducts or plenum spaces, as it has fire-resistant properties and emits less toxic smoke. Why Not A (USB 3.1 Gen 2): USB is for peripheral connections, not large-scale commercial installations. Why Not B (Straight tip fiber connector): Fiber connectors are for high-speed connections but are not specifically for commercial spaces. Why Not D (Cat 8): While Cat 8 is high-speed, it is not uniquely suited for commercial spaces like plenum cabling. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3."}, {"id": 59, "stem": "Which of the following connectors can be used to charge most modern mobile devices and may have the capacity to send data audio and video?", "options": {"A": "Lightning", "B": "USB-C", "C": "MicroUSB", "D": "MiniUSB"}, "answers": ["B"], "domain": 1, "multi": false, "exp": "B. USB-C: USB-C is a versatile connector that supports charging, high-speed data transfer, and the ability to send audio and video signals (e.g., DisplayPort over USB-C). It is used by most modern mobile devices and laptops because of its fast transfer speeds and power delivery capabilities. Incorrect Options: A. Lightning: Lightning is proprietary to Apple devices and does not natively support video output. C. MicroUSB: MicroUSB is outdated and does not support video output. D. MiniUSB: MiniUSB is an older standard and does not support modern features like video output or fast charging."}, {"id": 60, "stem": "A technician is having issues replacing a laptop's wireless card because the cover seems to be stuck Which of the following should the technician do next to troubleshoot this issued", "options": {"A": "Check the product manual for the procedure", "B": "Use a pry tool to force the cover open", "C": "Insert the wireless card into the M.2 slot", "D": "Try to move the cover by sliding it in all directions."}, "answers": ["A"], "domain": 2, "multi": false, "exp": "A. Check the product manual for the procedure: When hardware is not easily accessible, always consult the product manual for proper disassembly procedures. Forcing the cover can damage the laptop or void the warranty. Product manuals often provide step-by-step instructions for safely accessing internal components. Incorrect Options: B. Use a pry tool to force the cover open: Forcing the cover can cause physical damage to the device. C. Insert the wireless card into the M.2 slot: This step cannot be performed until the cover is properly removed. D."}, {"id": 61, "stem": "hardware installation. Which of the following involves installing an application on a server so several users can run the application concurrently without the need for local installation?", "options": {"A": "Client virtualization", "B": "Software as a service", "C": "Sandboxing", "D": "Embedded software"}, "answers": ["A"], "domain": 4, "multi": false, "exp": "Client virtualization involves installing an application on a server and enabling multiple users to run the application simultaneously via virtualized sessions. This eliminates the need for individual installations on local machines. Why Not B (Software as a Service): SaaS delivers software over the internet and does not require local installations but is managed by a third party, not the organization itself. Why Not C (Sandboxing): Sandboxing is for isolating applications for security testing, not for concurrent user access."}, {"id": 62, "stem": "When turning on a workstation, a technician observes the following message: \"Bootable device not found.\" The technician verifies the correct boot order in the BIOS. Which of the following steps should the technician take next?", "options": {"A": "Reformat the HDD.", "B": "Run HDD diagnostics.", "C": "Reseat the RAM.", "D": "Replace the HDD."}, "answers": ["B"], "domain": 2, "multi": false, "exp": "If the system reports“Bootable device not found”, and the BIOS is configured correctly, the next step is torun diagnostics on the hard driveto check for physical or logical failure. It could be a sign of afailing drive or corrupt boot sector. Option A:Reformatting the drive would erase data — not a diagnostic step. Option C:RAM does not affect whether a drive is bootable. Option D:Replacing the drive should only be doneafter diagnostics confirm failure. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.5: Given a scenario, troubleshoot problems related to storage devices."}, {"id": 63, "stem": "A recently installed printer is incorrectly aligning printed documents Which of the following should the technician do first to fix this issue?", "options": {"A": "Run the maintenance application.", "B": "Clean the rollers", "C": "Upgrade the firmware", "D": "Reinstall the drivers"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "A. Run the maintenance application: Most modern printers include a built-in maintenance application that can calibrate the print heads and correct alignment issues. Running this tool is the first step to address misalignment. Incorrect Options: B. Clean the rollers: Cleaning rollers is typically done to resolve paper feed or jamming issues, not alignment problems. C. Upgrade the firmware: While updating firmware is beneficial for performance improvements, it is not the first step for fixing alignment. D."}, {"id": 64, "stem": "Which of the following internet connection types is the best for extremely high data transfer with symmetrical upload and download speeds?", "options": {"A": "DSL", "B": "Cellular", "C": "Fiber", "D": "Satellite"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Fiber optic connections provide the highest data transfer rates and symmetrical upload and download speeds. This makes fiber the ideal choice for applications requiring high-speed connectivity, such as video conferencing, large file transfers, and cloud-based workflows. Reference: CompTIA A+ Certification Exam Core 1 Objectives —- Domain 2.0 Networking — Objective 2.7: Compare and contrast internet connection types, network types, and their features. A systems administrator deploys BitLocker to all devices. However, one of the desktop PCs is not able to encrypt the boot drive."}, {"id": 65, "stem": "Compare and contrast internet connection types, network types, and their features. A systems administrator deploys BitLocker to all devices. However, one of the desktop PCs is not able to encrypt the boot drive. Which of the following should the administrator check?", "options": {"A": "TPM", "B": "CPU", "C": "RAM", "D": "HDD"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "BitLocker Drive Encryption in Windows requires aTrusted Platform Module (TPM)to encrypt the boot drive securely. The TPM is a dedicated microcontroller designed to secure hardware through integrated cryptographic keys. It validates system integrity during boot and securely stores the encryption keys. If BitLocker cannot find a TPM or it is disabled in BIOS/UEFI, drive encryption cannot proceed. BitLocker can function without TPM using a USB startup key, but this compromises some security and is not recommended for managed enterprise environments."}, {"id": 66, "stem": "A technician needs to move a workstation to a different logical network segment. Which of the following technologies should the technician use?", "options": {"A": "DHCP", "B": "VLAN", "C": "DNS", "D": "VPN"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "AVLAN (Virtual LAN)is used to logically segment a network without requiring physical separation. It enables grouping devices based on function or department regardless of their physical location. Option A (DHCP):Assigns IP addresses dynamically but doesn’t create network segments. Option C (DNS):Resolves domain names to IP addresses, not used for network segmentation. Option D (VPN):Provides secure remote access but does not relate to logical segmentation within a local network. CompTIA A+ Core 1 Exam Objective Reference: Objective 2.3: Explain common logical networking concepts."}, {"id": 68, "stem": "A customer is able to print most documents with their USB inkjet printer, but the system is unresponsive when printing a certain report from a custom application. Nothing will print until the computer is restarted and the printer is power cycled. A technician remotes into the PC and confirms that the spooler stops working when this report is sent. After cleaning the spooler and reinstalling the drivers from the manufacturer's website, the issue persists. No other sites using the application report similar issues. Which of the following is most likely causing the issue?", "options": {"A": "The manufacturer is curating content before it reaches the device to preserve ink.", "B": "The application has a bug that the developer needs to address.", "C": "The system is using the PostScript language instead of the PCL.", "D": "Personal preferences have changed and documents with graphics are now online-only"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "If a print spooler crashes specifically with one application and no issue occurs on other systems, the most likely root cause is a bug within that specific application. Restarting the spooler and reinstalling drivers resolves system-wide or hardware-related issues—not app-specific failures. This indicates the application may be sending malformed print data. Reference: \"CompTIA A+ Certification All-in-One Exam Guide\" by Mike Meyers — Chapter 26, page 1144."}, {"id": 69, "stem": "Which of the following is related to the creation of a secured communication channel between workstations in different locations and is supported by credentials for authentication?", "options": {"A": "DHCP", "B": "CNAME", "C": "VLAN", "D": "VPN"}, "answers": ["D"], "domain": 3, "multi": false, "exp": "A Virtual Private Network (VPN) creates an encrypted, secure tunnel across a public or untrusted network. It uses authentication credentials to ensure that only authorized users can connect, keeping data safe from interception. 45 of Reference: CompTIA A+ Certification Exam Core 1 Objectives —- Domain 2.0 Networking — Objective 2.3: Compare and contrast various types of networks. A technician is troubleshooting a computer that has random BSOD alerts and intermittently freezes during normal use. Performance degrades as the day goes on. No new software or hardware changes have been implemented."}, {"id": 70, "stem": "Compare and contrast various types of networks. A technician is troubleshooting a computer that has random BSOD alerts and intermittently freezes during normal use. Performance degrades as the day goes on. No new software or hardware changes have been implemented. Freezing occurs under performance-intensive operations. Which of the following hardware components is most likely at fault?", "options": {"A": "Video card", "B": "HDD", "C": "RAM module", "D": "TPM"}, "answers": ["C"], "domain": 5, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: Random BSODs (Blue Screen of Death), intermittent freezing, and degraded performance under load are common symptoms of failing or faulty RAM (Random Access Memory). Here's the reasoning: RAM Module (Correct Answer): Faulty or failing RAM can cause random BSODs due to memory errors when the system attempts to read or write to corrupted memory locations. Intermittent freezing, especially under performance-intensive operations, can occur because the CPU relies heavily on RAM for active processing tasks."}, {"id": 71, "stem": "related to motherboards, RAM, CPUs, and power. Which of the following is an advantage of using a hybrid cloud instead of a public cloud?", "options": {"A": "Ability to reduce management overhead", "B": "Ability to use cross-platform virtualization", "C": "Ability to meet data residency requirements", "D": "Ability to leverage IaaS and PaaS"}, "answers": ["C"], "domain": 4, "multi": false, "exp": "A hybrid cloud combines on-premises infrastructure with public cloud services. One significant advantage is that it allows organizations to keep sensitive data in a private environment to meet regulatory or data residency requirements, while still utilizing the scalability and cost-efficiency of the public cloud for other workloads. This ensures compliance with legal mandates about data location. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 8, \"Virtualization and Cloud Computing\", page 488. Also supported in CompTIA A+ Exam Objectives220-1201under section 4.1."}, {"id": 73, "stem": "A help desk technician needs to work on a high-volume printer. Users have reported occasional paper jams and smudges appearing on printed documents. Which of the following steps should the technician do next to address these issues?", "options": {"A": "Perform a full factory reset.", "B": "Check and clean the rollers.", "C": "Change all the ink or toner cartridges.", "D": "Replace the fuser."}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Paper jams and smudging in high-volume printers are often caused bydirty or worn rollers. Rollers are responsible for feeding the paper through the printer. Over time, they accumulate dust, toner residue, or wear out, resulting in misfeeds or jams. Cleaning or replacing them typically resolves this issue. Option A (Factory reset):A full reset does not directly address mechanical issues like dirty rollers or smudging. It’s a last resort and more relevant to configuration or software-related issues."}, {"id": 74, "stem": "A technician receives a tablet that looks like it has a bulge inside. The bulge is pushing the screen away from the backplate. The tablet still turns on when it is plugged in, but the screen looks damaged and turns off when unplugged. Which of the following is the most likely cause of this issue?", "options": {"A": "Malfunctioning power supply", "B": "Damaged charge port", "C": "Swollen battery", "D": "Broken screen"}, "answers": ["C"], "domain": 5, "multi": false, "exp": "The most likely cause is a swollen battery, which occurs when the battery's internal components break down, causing a buildup of gas. This results in: Physical Symptoms: The battery bulges, pushing the screen away. Operational Symptoms: The device may still power on when connected to a charger but fails to hold a charge due to battery degradation. Option A (Malfunctioning power supply): Incorrect. Power supply issues affect charging but do not cause physical bulging. Option B (Damaged charge port): Incorrect. A damaged port can prevent charging but does not explain the bulge."}, {"id": 75, "stem": "Explanation The most likely cause is a swollen battery, which occurs when the battery's internal components break down, causing a buildup of gas. This results in: Physical Symptoms: The battery bulges, pushing the screen away. Operational Symptoms: The device may still power on when connected to a charger but fails to hold a charge due to battery degradation. Option A (Malfunctioning power supply): Incorrect. Power supply issues affect charging but do not cause physical bulging. Option B (Damaged charge port): Incorrect. A damaged port can prevent charging but does not explain the bulge. Option D (Broken screen): Incorrect. A damaged screen does not cause the device to bulge; it is likely a secondary effect of the swollen battery. Safety Note: A swollen battery poses a risk of fire or explosion and should be replaced immediately following proper disposal procedures. References:", "options": {"A": "Ensure the docking station is plugged in.", "B": "Press and release the laptop power button.", "C": "Plug the laptop in and let it charge overnight", "D": "Connect the laptop directly to the network."}, "answers": ["B"], "domain": 5, "multi": false, "exp": "Reasoning: Many docking stations provide power and functionality only when the laptop is properly powered on. If the laptop was powered off (e.g., during the vacation), docking it will not automatically turn it on. The technician should first ensure the laptop is powered on by pressing the power button. This is a common troubleshooting step when laptops in docking stations appear non-functional. Relevance to CompTIA A+ Core 1: This falls under Objective 5.2, which covers diagnosing and resolving common laptop and mobile device issues. Why the Other Options Are Incorrect: A."}, {"id": 76, "stem": "A user is receiving many unsolicited emails. Which of the following controls can be configured to best reduce these types of emails?", "options": {"A": "Load balancer", "B": "Spam gateway", "C": "Mail forwarding", "D": "Proxy servers"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "A spam gateway filters unsolicited emails at the server level, significantly reducing spam before it reaches user inboxes. Why Not A (Load balancer): Load balancers distribute traffic but don’t filter spam. Why Not C (Mail forwarding): Forwarding doesn’t filter spam. Why Not D (Proxy servers): Proxies control web traffic, not email filtering. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.10, email security controls. A user prints a spreadsheet in duplex mode. The spreadsheet is difficult to read because some of the columns spill onto the second side of the page."}, {"id": 77, "stem": "A user prints a spreadsheet in duplex mode. The spreadsheet is difficult to read because some of the columns spill onto the second side of the page. Which of the following should the user do to prevent the issue but still print on both sides of the page?", "options": {"A": "Turn off duplex printing.", "B": "Try a smaller font size in the spreadsheet.", "C": "Change the page orientation.", "D": "Use a different print driver."}, "answers": ["C"], "domain": 5, "multi": false, "exp": "Changing the page orientation(e.g., fromportrait to landscape) allows wider columns to fit on one side of the page. This maintains readability while continuing to use duplex printing. Option A:Disabling duplex defeats the goal of printing on both sides. Option B:May help, but could make the document harder to read if the font is too small. Option D:Unlikely to resolve formatting issues related to layout and dimensions. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.7: Given a scenario, troubleshoot common printer problems. Which of the following is an advantage of using VDI? A."}, {"id": 78, "stem": "Which of the following is an advantage of using VDI?", "options": {"A": "Authentication is not required on a domain.", "B": "Licensing costs are minimized.", "C": "Less manual configuration is needed for each workstation.", "D": "A virus is automatically contained locally."}, "answers": ["C"], "domain": 4, "multi": false, "exp": "Virtual Desktop Infrastructure (VDDhosts desktop environments on centralized servers. Thisallowsrapid deployment and consistent configurationacross multiple users, minimizing manual setup and easing IT management. Option A:VDI still uses standard authentication methods. Option B:Licensing can actually be more expensive due to virtualization software and backend servers. Option D:VDI centralizes the desktop environment — viruses would affect the virtual session, not be \"contained locally.\" CompTIA A+ Core 1 Exam Objective Reference: Objective 4.1: Compare and contrast cloud computing concepts."}, {"id": 79, "stem": "A technician is putting RJ45 connectors on Cat 6 cables. Which of the following tools should the technician use to secure the connectors?", "options": {"A": "Loopback plug", "B": "Wire cutters", "C": "Punchdown", "D": "Crimping"}, "answers": ["D"], "domain": 3, "multi": false, "exp": ""}, {"id": 80, "stem": "A company uses vital legacy software that does not run in the current OS version Which of the following will best support the software while keeping the OS current?", "options": {"A": "Shared resources", "B": "System sandbox", "C": "Test development", "D": "Application visualization"}, "answers": ["D"], "domain": 4, "multi": false, "exp": "Application virtualization allows legacy software to run in a virtualized environment while the operating system remains current. It isolates the application from the OS, ensuring compatibility without downgrading the OS. Why Not A (Shared resources): This relates to resource sharing, not application compatibility. Why Not B (System sandbox): Sandboxes isolate applications for security testing, not compatibility. Why Not C (Test development): Test environments are used for development, not running legacy applications. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 4."}, {"id": 81, "stem": "A salesperson is unable to reach the internet from a home office PC A support technician wants to verify the router is receiving a valid public IP address Which of the Wowing is a valid public IP address in this scenario?", "options": {"A": "10.254.128.11", "B": "66.157.195.20", "C": "172.16.0.30"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "A valid public IP address must fall outside the private IP address ranges: 10.0.0.0 to 10.255.255.255 172.16.0.0 to 172.31.255.255 192.168.0.0 to 192.168.255.255 66.157.195.20 is outside these ranges, making it a public IP address. Why Not A, C, D: These IPs fall within private IP address ranges. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.6, IP addressing. Which of the following devices is used to implement ACL polices for an environment? Managed switch Gateway Repeater Firewall"}, {"id": 83, "stem": "A technician is troubleshooting a connectivity issue on a network computer. The technician runs ipconfig in a command prompt and receives the following IP address:169.254.0.6. Which of the following is most likely the type of IP address being assigned?", "options": {"A": "DHCP reservation assignment", "B": "Dynamic assignment", "C": "Self-assignment", "D": "Static assignment"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "An IP address starting with169.254.x.xis aself-assigned address(also calledAPIPA— Automatic Private IP Addressing). It’s used when a client device cannot contact a DHCP server. This address allows limited communication on the local network segment butno internet access. Option A:DHCP reservations assign specific IPs from the DHCP server — they don’t result in APIPA. Option B:Dynamic assignment from DHCP assigns valid IPs in the proper subnet, not 169.254.x.x. Option D:Static IPs are manually set and would not fall in the 169.254.x.x range unless set incorrectly."}, {"id": 84, "stem": "A technician is troubleshooting a PoE phone that will not turn on. When a laptop is plugged directly into the switchport for the phone the technician sees a data link LED and activity. Which of the following tools should the technician use to verify PoE availability to the phone?", "options": {"A": "Network tap", "B": "Cable tester", "C": "Loopback plug", "D": "Toner probe"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "Reasoning: A cable tester capable of testing Power over Ethernet (PoE) functionality can verify whether the switchport is providing the required power to the phone. This tool measures both the presence of data and the voltage or wattage being provided through the Ethernet cable. This is the most effective way to confirm that PoE is available on the port. Why the Other Options Are Incorrect: A. Network tap: A network tap is primarily used to monitor network traffic, not to test for PoE availability. It cannot verify if power is being supplied through the Ethernet cable. C."}, {"id": 85, "stem": "Which of the following drive interfaces is typically used in server systems but not in home computers?", "options": {"A": "NVMe", "B": "SAS", "C": "SATA", "D": "PCIe"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "SAS (Serial Attached SCSI) is a high-performance drive interface commonly found in enterprise environments and servers due to its reliability and speed. While SATA is more common in consumer systems, SAS is specifically designed for mission-critical applications, offering features like full-duplex operation and compatibility with SATA drives. Reference: \"CompTIA A+ Certification All-in-One Exam Guide\" by Mike Meyers — Chapter 8, \"Mass Storage Technologies\", page 288. The output from a dot matrix printer has become lighter over time."}, {"id": 86, "stem": "The output from a dot matrix printer has become lighter over time. Which of the following should a technician do to fix the issue?", "options": {"A": "Clean the printhead.", "B": "Replace the ribbon.", "C": "Install a maintenance kit.", "D": "Calibrate the alignment."}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Dot matrix printersuse aninked ribbonthat physically contacts the paper through tiny pins. Over time, the ribbon wears out or dries up, resulting infaded or light print output. Replacing the ribbon restores print quality. Option A:Cleaning helps with image clarity, not ink density. Option C:Maintenance kits apply to laser printers, not dot matrix. Option D:Calibration affects print position, not darkness. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.7: Given a scenario, troubleshoot common printer problems."}, {"id": 87, "stem": "Which of the following services is used to allocate IP addresses in an enterprise-wide environment?", "options": {"A": "DNS", "B": "Syslog", "C": "Telnet", "D": "DHCP"}, "answers": ["D"], "domain": 3, "multi": false, "exp": "Dynamic Host Configuration Protocol (DHCP) is a network service used to automatically assign IP addresses and other network configuration details (such as subnet masks and default gateways) to devices on an enterprise-wide network. Why Not A (DNS): DNS resolves domain names to IP addresses but does not allocate IP addresses. Why Not B (Syslog): Syslog is used for logging system events, not IP address management. Why Not C (Telnet): Telnet is a protocol for remote access, not for IP allocation. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.6, DHCP concepts."}, {"id": 88, "stem": "A company needs to keep a record of tasks performed by an application. Which of the following should the company most likely implement as part of a solution?", "options": {"A": "Fileshare", "B": "Syslog", "C": "Database", "D": "SAN"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Syslog is used to log system events and tasks performed by applications, providing a centralized record of activity. Why Not A (Fileshare): Fileshares store files but are not designed for event logging. Why Not C (Database): Databases can store logs but are not a logging mechanism themselves. Why Not D (SAN): A SAN is a storage solution, not a logging tool. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.6, system monitoring and logging. A group of friends is gathering in a room to play video games. One of the friends has a game server."}, {"id": 89, "stem": "A group of friends is gathering in a room to play video games. One of the friends has a game server. Which of the following network types should the group use so they can all connect to the same server and the internet?", "options": {"A": "SAN", "B": "MAN", "C": "LAN", "D": "PAN"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "The appropriate network type for this scenario is a Local Area Network (LAN), which is designed for small, localized networks, such as within a single building or room. LANs are ideal for gaming because they provide high-speed, low-latency connections. Option A (SAN): Incorrect. A Storage Area Network is used for data storage, not for gaming or general networking. Option B (MAN): Incorrect. A Metropolitan Area Network covers a city or campus, far exceeding the scope needed for a gaming setup in a single room. Option D (PAN): Incorrect."}, {"id": 91, "stem": "1.5: Compare and contrast methods for securing mobile devices. Which of the following connectors is found on an optical networking cable?", "options": {"A": "RJ45", "B": "LC", "C": "USB-C", "D": "Lightning"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: LC Connector (Lucent Connector): LC is a type of fiber optic connector commonly used in optical networking cables. It is small, compact, and widely used for high-speed data transfer over fiber optic networks. LC connectors are specifically designed for fiber optic cables, making them the correct answer. Incorrect Options: A. RJ45: RJ45 connectors are used for Ethernet cables (twisted-pair copper cabling) and are not compatible with optical networking cables. C."}, {"id": 92, "stem": "including fiber optic cables. An employee who travels worldwide wants a workstation to perform the same whether the workstation is in the corporate office environment or elsewhere. Which of the following should a technician implement?", "options": {"A": "Public cloud", "B": "VDI", "C": "SSH", "D": "SaaS"}, "answers": ["B"], "domain": 3, "multi": false, "exp": ""}, {"id": 93, "stem": "A technician wants to monitor network statistics for devices communicating with one another on the local subnet Which of the following devices should the technician install.", "options": {"A": "Managed switch", "B": "Router", "C": "Access point", "D": "Firewall"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "A managed switch provides advanced features such as traffic monitoring and VLAN configuration, allowing a technician to view network statistics for devices on the local subnet. Why Not B (Router): A router connects different networks and directs traffic between them but does not provide detailed subnet-level statistics. Why Not C (Access point): Access points provide wireless connectivity but lack traffic monitoring features. Why Not D (Firewall): A firewall filters traffic but is not used for monitoring detailed statistics on a local subnet."}, {"id": 94, "stem": "A user's wireless headset shows a \"connected\" status when turned on, but the Bluetooth list on the user's phone shows that the headset is \"not connected.\" Which of the following should the technician do?", "options": {"A": "Enter the PIN.", "B": "Turn off Wi-Fi.", "C": "Re-pair the devices.", "D": "Enable Bluetooth."}, "answers": ["C"], "domain": 1, "multi": false, "exp": "When a device shows asnot connectedeven though it previously paired, the most effective action is tore-pair the devices. This resets the Bluetooth connection, clears any corruption in pairing profiles, and re-establishes communication. Option A:Entering a PIN is only relevant during initial pairing and may not be prompted again. Option B:Turning off Wi-Fi doesn’t typically affect Bluetooth; they operate on similar frequencies but don’t conflict this way in normal use. Option D:If Bluetooth were disabled, the device wouldn’t appear at all, not just show as “not connected."}, {"id": 95, "stem": "A technician needs to ensure all data communications on all network devices are encrypted when logging in to the console. Which of the following protocols should the technician enable?", "options": {"A": "SSH", "B": "LDAP", "C": "FTPS", "D": "SMTP"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "SSH (Secure Shell) encrypts data communications for secure remote login and management of network devices, ensuring all console connections are encrypted. Why Not B (LDAP): LDAP is used for directory services and does not encrypt by default. Why Not C (FTPS): FTPS encrypts file transfers, not console communications. Why Not D (SMTP): SMTP is used for email transmission, not for securing login sessions. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.7, network security protocols. A technician needs to select PC components with a minimal number of visible internal cables."}, {"id": 96, "stem": "A technician needs to select PC components with a minimal number of visible internal cables. Which of the following should the technician use?", "options": {"A": "SATA drive connections", "B": "Liquid cooling", "C": "Modular power supply", "D": "Wireless NIC"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Amodular power supplyallows a technician toconnect only the power cables that are needed, reducing clutter and improving airflow. This is ideal when aiming for a clean build withminimal visible internal cables. Option A (SATA drive connections):Still require both power and data cables, adding to cable count. Option B (Liquid cooling):May reduce some bulk from large air coolers, but adds tubing and still needs cabling. Option D (Wireless NIC):Adds wireless capability but has no relation to internal cabling cleanliness. CompTIA A+ Core 1 Exam Objective Reference: Objective 3."}, {"id": 97, "stem": "An IT specialist compares Bluetooth and NFC technologies for mobile device connectivity. Which of the following statements accurately describes a key difference between the two? A. NFC is faster than Bluetooth when transferring large files between devices. B. NFC consumes more power than Bluetooth, making it less suitable for devices in which battery conservation is crucial.", "options": {"C": "NFC requires pairing with the receiving host, whereas Bluetooth just needs the available connection.", "D": "NFC works best within a few centimeters, but Bluetooth can connect devices that are up to 32ft (10m)"}, "answers": ["D"], "domain": 1, "multi": false, "exp": "NFC (Near-Field Communication)operates atvery short ranges — usually less than 4cm, and is ideal for quick, secure transactions like contactless payments.Bluetoothsupportslonger ranges (up to 10 meters or 32 feet)and is suited for ongoing connections like wireless headsets or file transfers. Option A:Bluetooth is faster for large file transfers. Option B:NFC usesless power, not more. Option C:NFC doesnotrequire pairing — Bluetooth does. CompTIA A+ Core 1 Exam Objective Reference: Objective 1.5: Given a scenario, connect and configure accessories and ports of mobile devices."}, {"id": 98, "stem": "Which of the following tools would a technician use to connect wires to an RJ45 connector?", "options": {"A": "Crimper", "B": "Cable stripper", "C": "Punchdown", "D": "Loopback plug"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "A crimper is specifically used to attach RJ45 connectors to the ends of network cables. It pressesthe connector pins into the cable's wires, establishing a secure electrical connection. A punchdown tool is used for wiring patch panels or keystone jacks, not for attaching connectors. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 3, \"Cables and Connectors\", page 162. Also outlined in the220-1201 objectives under 3.1. Which of the following is used primarily for archiving data? A. PAN B. MAN Cc. SAN D. LAN E. WAN"}, {"id": 99, "stem": "Which of the following is used primarily for archiving data? A. PAN B. MAN Cc. SAN", "options": {"D": "LAN", "E": "WAN"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "A Storage Area Network (SAN) is primarily used for data archiving and large-scale storage. SANs provide high-speed, block-level storage for enterprise environments. Why Not A (PAN): Personal Area Networks are for connecting personal devices like phones and smartwatches. Why Not B (MAN): Metropolitan Area Networks are for city-wide data communication, not storage. Why Not D (LAN): Local Area Networks are for general connectivity, not dedicated storage. Why Not WAN: Wide Area Networks are for connecting geographically dispersed networks, not storage."}, {"id": 100, "stem": "A user reports that their desktop PC does not turn on. Which of the following components would most likely cause the issue?", "options": {"A": "PSU", "B": "GPU", "C": "RAM", "D": "CPU"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Ifa desktopfails to power on entirely, the most probable cause is afaulty Power Supply Unit (PSU). If there are no lights, fans, or POST beeps, the PSU may have failed, cutting off all power to the motherboard and components. Option B (GPU):Could prevent video output, but the system would still power on and beep. Option C (RAM):Missing or faulty RAM would cause POST errors but not prevent startup entirely. Option D (CPU):A bad CPU may cause POST failure, but the system would usually at least power on. CompTIA A+ Core 1 Exam Objective Reference: Objective 3."}, {"id": 101, "stem": "A technician is experimenting with network configurations and has connected two laptops to an unmanaged switch. The technician configured one of the laptops with a static IP address of 192.168.1.1 and the other with a static IP address of 192.168.2.2. The laptops are not communicating with each other. Which of the following is the most likely explanation for this issue?", "options": {"A": "The technician needs to use a hub instead of a switch.", "B": "The wireless NICs are malfunctioning.", "C": "PoE interferes with intersubnet communication.", "D": "The laptops do not have access to a router."}, "answers": ["D"], "domain": 3, "multi": false, "exp": ""}, {"id": 103, "stem": "A user is having trouble with the location services on their smartphone. Location-based applications show incorrect positions when the user is traveling. This issue affects the user’s ability to navigate and use location- dependent applications. Which of the following is the best way to resolve this issue?", "options": {"A": "Downloading a third-party mapping application", "B": "Resetting the network settings", "C": "Enabling Wi-Fi to assist GPS", "D": "Restarting the smartphone"}, "answers": ["C"], "domain": 1, "multi": false, "exp": "Wi-Fi assistance in mobile devices helps improve location accuracy by using nearby wireless networks to triangulate the device’s position, even when GPS signals are weak (like indoors or in dense areas). Reference: CompTIA A+ Certification Exam Core | Objectives — Domain 1.0 Mobile Devices — Objective 1.6: Troubleshoot common issues with mobile devices. A user is having issues when charging a device with a Lightning cable. The cable is not recognized when it is plugged into the device. This issue is usually resolved by flipping the cable over."}, {"id": 104, "stem": "1.6: Troubleshoot common issues with mobile devices. A user is having issues when charging a device with a Lightning cable. The cable is not recognized when it is plugged into the device. This issue is usually resolved by flipping the cable over. This issue does not occur with other devices of the same type. Which of the following would most likely cause the issue?", "options": {"A": "The device needs to be restarted.", "B": "The battery may be swelling and needs inspection.", "C": "The cable is failing and needs to be replaced", "D": "The charging port is dirty or damaged"}, "answers": ["D"], "domain": 5, "multi": false, "exp": "If flipping the cable helps but the problem is isolated to this device (not others of the same type), the most likely cause is a dirty or damaged charging port on the device itself. Dirt or debris inside the port can prevent a good electrical connection, causing the cable to work intermittently. Reference: CompTIA A+ Certification Exam Core 1 Objectives — Domain 1.0 Mobile Devices — Objective 1.6: Troubleshoot common mobile device issues. A user joins a conference call with a Bluetooth headset. Which of the following has the user created? A. MAN B. PAN C. SAN D. WAN"}, {"id": 105, "stem": "1.6: Troubleshoot common mobile device issues. A user joins a conference call with a Bluetooth headset. Which of the following has the user created?", "options": {"A": "MAN", "B": "PAN", "C": "SAN", "D": "WAN"}, "answers": ["B"], "domain": 1, "multi": false, "exp": "B. PAN (Personal Area Network): A PAN is a network established between devices in close proximity, such as between a smartphone and a Bluetooth headset. Bluetooth technology is specifically designed for short-range communication, making it a type of PAN. Incorrect Options: A. MAN (Metropolitan Area Network): A MAN covers a city or metropolitan area and is not relevant to Bluetooth connections. C. SAN (Storage Area Network): A SAN is used for large-scale data storage, unrelated to Bluetooth connections. D. WAN (Wide Area Network): A WAN spans large geographical areas (e.g."}, {"id": 106, "stem": "features. A computer displays an error message indicating there is insufficient storage when installing applications. The user reports slow application load times. Which of the following replacement components would best resolve this issue?", "options": {"A": "SSD", "B": "USB", "C": "HDD", "D": "RAM"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Upgrading to asolid-state drive (SSD)providesmore storage spaceandfaster read/write speeds, which resolves both the “insufficient storage” error and slow application loads. Option B (USB):Not intended for permanent application storage or performance improvements. Option C (HDD):Could solve storage capacity but would not improve speed. Option D (RAM):Affects multitasking and memory-intensive tasks, not storage capacity directly. CompTIA A+ Core | Exam Objective Reference: Objective 3.5: Given a scenario, troubleshoot problems related to storage devices."}, {"id": 107, "stem": "A management team is concerned about enterprise devices that do not have any controls in place. Which of the following should an administrator implement to address this concern?", "options": {"A": "MDM", "B": "MFA", "C": "vpn", "D": "SSL"}, "answers": ["A"], "domain": 1, "multi": false, "exp": "Mobile Device Management (MDM) enables administrators to enforce controls on enterprise devices, such as restricting apps, ensuring compliance, and remotely managing security policies. Why Not B (MFA): Multi-Factor Authentication secures user access but does not control device configurations. Why Not C (VPN): VPN secures communication but does not enforce device controls. Why Not D (SSL): SSL secures data in transit but does not provide device management. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.7, device management concepts."}, {"id": 108, "stem": "Which of the following storage options would a technician most likely recommend to have large amounts of affordable capacity without concern for read times on a desktop computer?", "options": {"A": "750GB NVMe M.2 SSD", "B": "2x 1TB PCIe SSD in RAID 1", "C": "2TB SATA 3.5\" 5,400rpm HDD", "D": "4TB SAS 2.5\" 15,000rpm HDD"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "If performance isnot a primary concernand the user requireslarge, cost-effective storage, a2TB 5400rpm SATA HDDis ideal. It offers high capacity at a lower price point than SSDs and faster HDDs. Option A:NVMe drives offer exceptional speed but are significantly more expensive per GB and not necessary when read/write speed is not a concern. Option B:RAID 1 improves redundancy but cuts usable capacity in half and uses expensive SSDs. Option D:SAS drives are fast and reliable but are enterprise-grade and expensive — overkill for desktop use."}, {"id": 109, "stem": "Several storms cause mission-critical servers to go offline unexpectedly A server also goes offline suddenly due to haroNvare failure Upon assessment the company purchases new UPSs to condition power and allow the OSs to shut down gracefully in the event of a power failure However, the UPSs are delayed due to supply chain issues Which of the following can balance a cost-effective solution with uptime requirements?", "options": {"A": "Purchasing backup generators", "B": "Increasing input voltage", "C": "Installing redundant PSUs", "D": "Activating a hot site"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "C. Installing redundant PSUs (Power Supply Units): Redundant PSUs provide fault tolerance by ensuring that if one power supply fails, another will take over seamlessly. This is a cost-effective way to increase uptime while waiting for the UPSs to arrive. Incorrect Options: A. Purchasing backup generators: Generators are costly and are typically used for long-term outages, not as an immediate or cost-effective solution. B. Increasing input voltage: This is not a practical solution to hardware failures or power issues. D."}, {"id": 110, "stem": "A technician is troubleshooting an all-in-one laser printer that prints a vertical line when making copies and scans. When users print or receive faxes, the output from the printer is correct. Which of the following should the technician examine to determine the cause of the issue?", "options": {"A": "The pickup rollers", "B": "The corona wire", "C": "The document feeder", "D": "The drum assembly"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Since the issue only occurs during scanning and copying (not printing or faxing), the problem is isolated to the document feeder. A vertical line is typically caused by debris or damage on theglass under the ADF (Automatic Document Feeder), not on components related to printing. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 4, page 261. A salesperson is unable to use a personal device to access emails and calendar features at a client site but was able to use the device while at the office."}, {"id": 111, "stem": "A salesperson is unable to use a personal device to access emails and calendar features at a client site but was able to use the device while at the office. Which of the following policies has been enforced on the salesperson's mobile device?", "options": {"A": "MOW", "B": "MAN", "C": "MFA", "D": "MAM"}, "answers": ["D"], "domain": 1, "multi": false, "exp": "Mobile Application Management (MAM) enforces policies restricting access to apps and services based on location, ensuring security at external sites. Why Not A (MOW): \"Mobile Only Workplace\" (MOW) is not a recognized term in this context. Why Not B (MAN): Metropolitan Area Network (MAN) is unrelated to mobile device policies. Why Not C (MFA): Multi-Factor Authentication secures user accounts but does not enforce app restrictions. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.7, mobile device security policies. Which of the following resolutions is commonly known as Ultra HD? A."}, {"id": 112, "stem": "Which of the following resolutions is commonly known as Ultra HD?", "options": {"A": "1920x1080", "B": "2048x1080", "C": "3840x2160", "D": "7680x4320"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Ultra HD (UHD), also referred to as4K UHD, has a resolution of3840x2160. It's four times the resolution of standard 1080p (Full HD), offering more screen real estate and sharper images. Option A (1920x1080):Full HD (FHD), not UHD. Option B (2048x1080):DCI 2K — used in cinema, not common for Ultra HD. Option D (7680x4320):Known as 8K UHD, not standard Ultra HD. CompTIA A+ Core 1 Exam Objective Reference: Objective 1.7: Compare and contrast display technologies and their features. A technician is troubleshooting internet connectivity issues after a firewall update."}, {"id": 113, "stem": "A technician is troubleshooting internet connectivity issues after a firewall update. Users report that they can access local network resources, such as printers and shares, but cannot access the internet. Which of the following settings is most likely causing the issue?", "options": {"A": "Static IP assignments", "B": "Default gateway", "C": "Subnet mask", "D": "VLANs"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "If users canaccess local network resourcesbut not theinternet, the most likely culprit is amisconfigured or missing default gateway. The default gateway routes traffic from the local network to external networks (i.e., the internet). If it’s not properly set or was altered during a firewall update, internet traffic won’t be forwarded correctly. Option A:Static IPs could cause conflict, but wouldn't affect only external access if configured correctly. Option C:An incorrect subnet mask could isolate devices, but local communication would likely be impacted too."}, {"id": 114, "stem": "Which of the following DNS records would an administrator change to redirect email flow?", "options": {"A": "MX", "B": "TXT", "C": "SPF", "D": "CNAME"}, "answers": ["A"], "domain": 3, "multi": false, "exp": "AnMxX (Mail Exchange)record defineswhich mail servers are responsible for receiving emailfor a domain. If you want to change or redirect email traffic, the MX recordmust be updated with the correct server information. Option B (TXT):Stores text-based info — used for SPF, DKIM, etc. Option C (SPF):Part of email authentication stored in a TXT record; doesn’t redirect traffic. Option D (CNAME):Alias for another domain name — not used for email routing. CompTIA A+ Core 1 Exam Objective Reference: Objective 2.4: Compare and contrast common networking hardware."}, {"id": 115, "stem": "Users working with large files back up the files to external hard drives. One user's files take longer to back up than other users' files. The user has tried backing up the files to other users' drives with the same results. Which of the following steps should the technician take first to correct this issue?", "options": {"A": "Replace the hard drive's USB cable.", "B": "Defragment the user's external hard drive.", "C": "Update the storage drivers on the user's system.", "D": "Instruct the user to compress the files."}, "answers": ["B"], "domain": 2, "multi": false, "exp": "Ifa hard drive is heavily fragmented, file read/write operations can take significantly longer, causing slow backup speeds. Defragmenting the drive organizes the data for more efficient access. Why Not A (Replace the hard drive's USB cable): A faulty cable would typically cause disconnections or errors, not just slower speeds. Why Not C (Update the storage drivers): This might help if the issue is with system drivers, but the described symptoms point to a fragmentation issue. Why Not D (Compress the files): Compression reduces file size but does not address the root cause of the slow backups."}, {"id": 116, "stem": "A user connects their laptop to a projector in a conference room. Once connected, the userreports the screen is smaller at the bottom than at the top. The user tries restarting the laptop and then disconnecting and reconnecting the cable to the projector. Which of the following should a technician do to resolve the issue?", "options": {"A": "Replace the HDMI cable.", "B": "Power cycle the projector.", "C": "Adjust the keystone", "D": "Increase the resolution."}, "answers": ["C"], "domain": 5, "multi": false, "exp": "A distorted image where the screen is not symmetrical (wider at the top or bottom) is typically due to keystone distortion. Adjusting the projector's keystone settings corrects this trapezoidal effect caused by an angled projection. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 3, page 152. An SAS RAID array has severely degraded and gone offline A systems administrator examines the syslog, and the point of failure is not obvious. Which of the following techniques should the administrator use to identify the issue (Select two). A. Runa magnet over each drive. B."}, {"id": 117, "stem": "An SAS RAID array has severely degraded and gone offline A systems administrator examines the syslog, and the point of failure is not obvious. Which of the following techniques should the administrator use to identify the issue (Select two).", "options": {"A": "Runa magnet over each drive.", "B": "Check if one of the drives is not level", "C": "Listen for clicking and grinding noises", "D": "Check the OS logs", "E": "Update the RAID controller firmware.", "F": "Check the historical SMART data"}, "answers": ["C", "F"], "domain": 5, "multi": true, "exp": "Clicking and grinding noises indicate mechanical drive failure. SMART data provides insights into the health and status of drives, helping identify failing components in the RAID array. Why Not A (Run a magnet): This would damage drives. Why Not B (Check if one drive is not level): Physical leveling is irrelevant. Why Not D (Check OS logs): OS logs may provide limited information for RAID arrays. Why Not E (Update RAID controller firmware): While important, it does not diagnose drive failure. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.3, storage troubleshooting."}, {"id": 118, "stem": "Which of the following printing initiatives would be best to accomplish environmentally friendly objectives?", "options": {"A": "Requiring user authentication for printing", "B": "Locking down printing to only certain individuals", "C": "Modifying duplex settings to double-sided", "D": "Changing the print quality settings to best"}, "answers": ["C"], "domain": 2, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: Modifying duplex settings to double-sided: Printing on both sides of the paper (duplex printing) reduces paper usage, making it one of the most effective environmentally friendly printing initiatives. It directly minimizes waste and supports sustainability goals in the workplace. Incorrect Options: A. Requiring user authentication for printing: While this can reduce unnecessary or unauthorized printing, it does not directly address environmental objectives like saving resources. B."}, {"id": 119, "stem": "environmental impact. A technician is installing a new high-end graphics card that uses a 12VHPWR connector. Which of the following is the maximum wattage supported by this power connector?", "options": {"A": "400W", "B": "MOW", "C": "600W", "D": "700W"}, "answers": ["C"], "domain": 1, "multi": false, "exp": "The 12VHPWR connector can supply up to 600 watts of power, designed for high-end graphics cards. Why Not A (400W): This is less than the connector’s maximum capability. Why Not B (MOW): This is an invalid option. Why Not D (700W): The maximum supported power is 600W. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.4, power supply and connectors. Which of the following can a user utilize to share their mobile phone connection with their laptop? A. IR B. NFC C. Wi-Fi Direct D. Tethering"}, {"id": 120, "stem": "Which of the following can a user utilize to share their mobile phone connection with their laptop?", "options": {"A": "IR", "B": "NFC", "C": "Wi-Fi Direct", "D": "Tethering"}, "answers": ["D"], "domain": 1, "multi": false, "exp": "Tethering refers to sharing a mobile phone’s internet connection with another device, such as a laptop, either through USB, Bluetooth, or Wi-Fi. Tethering effectively turns the mobile phone into a personal hotspot for internet access. Option A (IR): Incorrect. Infrared (IR) is used for short-range communication, such as remote controls, but it does not support internet sharing. Option B (NFC): Incorrect. Near-field communication (NFC) is used for close-proximity data transfer, not for internet sharing. Option C (Wi-Fi Direct): Incorrect."}, {"id": 121, "stem": "Explanation Tethering refers to sharing a mobile phone’s internet connection with another device, such as a laptop, either through USB, Bluetooth, or Wi-Fi. Tethering effectively turns the mobile phone into a personal hotspot for internet access. Option A (IR): Incorrect. Infrared (IR) is used for short-range communication, such as remote controls, but it does not support internet sharing. Option B (NFC): Incorrect. Near-field communication (NFC) is used for close-proximity data transfer, not for internet sharing. Option C (Wi-Fi Direct): Incorrect. Wi-Fi Direct enables device-to-device communication but does not inherently provide internet sharing. References:", "options": {"A": "To provide only data connectivity", "B": "To supply power across a cable", "C": "To improve wireless performance", "D": "To extend a network connection"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "A PoE injector is used to add power to an Ethernet cable, enabling the cable to deliver both power and data. This is crucial when connecting to PoE-enabled devices like IP cameras or wireless access points that are far from power outlets. Reference: \"CompTIA A+ Complete Practice Tests\" by Jeff T. Parker — Chapter 10, Question 77, page 585. A human resources department uses a network shared with other departments to produce a variety of printed resources for legal retention. The human resources department only wants Its members to have access to these materials."}, {"id": 122, "stem": "A human resources department uses a network shared with other departments to produce a variety of printed resources for legal retention. The human resources department only wants Its members to have access to these materials. Which of the following should the technician Implement?", "options": {"A": "Security groups", "B": "Audit logs", "C": "Time-of-day access", "D": "Print server"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Security groups are used to manage access permissions to network resources, ensuring only authorized HR department members can access the shared materials. Why Not B (Audit logs): Audit logs monitor activity but do not restrict access. Why Not C (Time-of-day access): Time-of-day access limits when users can access resources but doesn’t specify user permissions. Why Not D (Print server): A print server manages print jobs but does not control file access. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 2.5, access control and permissions."}, {"id": 123, "stem": "A new directive mandates the use of a security component to securely allow users to authenticate to systems, access sensitive data, and enter the office. The component must provide an additional factor of authentication alongside user accounts and cannot be something the user o Which of the Mowing components best meets these requirements?", "options": {"A": "Fingerprint reader", "B": "Smart card", "C": "Secure token", "D": "NFC scanner"}, "answers": ["B"], "domain": 2, "multi": false, "exp": "A smart card provides an additional factor of authentication by storing secure credentials, such as certificates, that cannot be guessed or replicated. It complements user accounts and is \"something you have\". Why Not A (Fingerprint reader): This is \"something you are\", but the scenario specifically requires a physical token. Why Not C (Secure token): Secure tokens are also valid but may not integrate as seamlessly into multi-factor authentication for physical and system access. Why Not D (NFC scanner): An NFC scanner is a device and not a token itself; it reads cards or other credentials."}, {"id": 125, "stem": "CPU cooling and heat sink improvements. Which of the following networking devices will most likely need to be installed in between the ISP running DOCSIS and the LAN in a SOHO environment?", "options": {"A": "Switch", "B": "Firewall", "C": "Cable modem", "D": "Router", "E": "Access point"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: To determine the correct device, we need to understand how a DOCSIS (Data Over Cable Service Interface Specification) network functions in a Small Office/Home Office (SOHO) environment: C. Cable Modem: A cable modem is required to convert the signal provided by the ISP (Internet Service Provider) over a DOCSIS network into a format that is usable by the local area network (LAN)."}, {"id": 126, "stem": "LAN is the cable modem. A user is unable to access secure applications on their tablet when working from home a couple days per week, but the applications work when in the office. Which of the following services most likely needs to be reconfigured to allow for remote work?", "options": {"A": "Global Positioning System", "B": "Mobile device management", "C": "Wi-Fi Protected Access", "D": "Near-field communication"}, "answers": ["B"], "domain": 3, "multi": false, "exp": "Mobile Device Management (MDM)software often controls access to corporate resources based onlocation, network, or VPN status. If the MDM is not configured to allow access from outside the office or via home networks, the apps may be blocked. This is the most probable cause if apps work only on-premises. Option A:GPS is used for location services, not access control. Option C:WPA is a Wi-Fi security protocol, not related to access restrictions. Option D:NFC enables close-range communication — irrelevant to app access. CompTIA A+ Core 1 Exam Objective Reference: Objective 1."}, {"id": 127, "stem": "A technician recently updated the firmware on a dual-BIOS motherboard. Following the update, the system has been stuck in a boot loop and cannot start an OS from any internal or external device. The technician cannot access the UEFI menu either. Which of the following should the technician do next?", "options": {"A": "Enable the secondary configuration.", "B": "Downgrade the firmware via USB.", "C": "Start a warranty repair of the motherboard.", "D": "Reapply thermal paste to the CPU."}, "answers": ["A"], "domain": 2, "multi": false, "exp": "Dual-BIOS motherboards contain two firmware chips. If theprimary BIOS becomescorrupted, the system canfailover to the secondary BIOS. Most boards allow manual enabling of the secondary BIOS via a physical switch or jumper. Option B:Downgrading firmware may not be possible if the system won’t POST or access UEFI. Option C:Not necessary until both BIOS chips are non-functional. Option D:Thermal paste affects heat dissipation, not BIOS/boot behavior. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.5: Given a scenario, troubleshoot problems related to motherboards, RAM, CPU, and power."}, {"id": 128, "stem": "An end user's domain password expires while they are working from home. The end user tries to reset the password using Ctrl+Alt+Delete and then receives the following message: Configuration information could not be read from the domain controller, either because the machine is unavailable or because access is denied. Which of the following will resolve this issue?", "options": {"A": "Restart the computer.", "B": "Connect to the VPN.", "C": "Reset the account in Active Directory.", "D": "Join the Wi-Fi network."}, "answers": ["B"], "domain": 3, "multi": false, "exp": "To change adomain passwordfrom a remote location, the system must communicate with thedomain controller. Since the user is working from home, they need toconnect to the corporate VPNto establish that secure connection. Without it, the password change cannot be authenticated. Option A:Restarting will not resolve the lack of connection to the domain controller. Option C:Resetting the password in AD could help, but doesn’t let the user reset it themselves. Option D:The user may already be on Wi-Fi; the issue is with connecting to thecorporate network, not local."}, {"id": 129, "stem": "A technician has discovered that some users are connected to a network that is not available on the user interface. Which of the following is the most effective tool the technician can use to identify networks that are not broadcasting SSIDs? A. Cable tester lee] . Toner probe", "options": {"C": "Wi-Fi analyzer", "D": "Loopback plug"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Comprehensive and Detailed Step-by-Step Explanation: Wi-Fi Analyzer: A Wi-Fi analyzer is a tool used to detect and analyze wireless networks, even those that are not broadcasting their SSIDs (hidden networks). It provides detailed information about nearby networks, including signal strength, channel usage, and security protocols. In this case, the Wi-Fi analyzer can identify the hidden networks that users are connected to, which are not visible on the standard user interface. Incorrect Options: A. Cable tester: A cable tester is used to test the integrity of physical network cables."}, {"id": 130, "stem": "wireless networking concepts, including Wi-Fi tools and protocols. Which of the following types of connectors does an IDE hard drive use for power?", "options": {"A": "F type", "B": "SC", "C": "Molex", "D": "Lightning"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "An IDE hard drive uses a Molex connector for power. This 4-pin connector is a standard for older drives. Why Not A (F type): F type connectors are used for coaxial cables in video and internet applications. Why Not B (SC): SC connectors are for fiber optic cables. Why Not D (Lightning): Lightning connectors are for Apple devices. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.1, cable types and connectors. Which of the following networking devices is used to create a mesh network? A. Modem B. DSL C. Access point D. ONT"}, {"id": 131, "stem": "Which of the following networking devices is used to create a mesh network?", "options": {"A": "Modem", "B": "DSL", "C": "Access point", "D": "ONT"}, "answers": ["C"], "domain": 3, "multi": false, "exp": "Mesh networks rely on multiple access points (or mesh nodes) to create a seamless, self-healing network. Each access point communicates with others to extend coverage and improve reliability without requiring a wired backbone for each AP. Reference: CompTIA A+ Certification Exam Core | Objectives — Domain 2.0 Networking — Objective 2.4: Compare and contrast wireless networking protocols."}, {"id": 132, "stem": "Compare and contrast wireless networking protocols. Each floor at a new corporate facility will have four printers available for all users to print from AH of the printers will be connected with RJ45 and not joined to a domain Which of the following needs to be set up to accomplish this task? (Select two).", "options": {"A": "Printer shares", "B": "DHCP server", "C": "Print server", "D": "Printer subnet", "E": "SMB configuration", "F": "Printer Wi-Fi settings"}, "answers": ["A", "C"], "domain": 3, "multi": true, "exp": "To allow multiple users to print to networked printers: Printer shares enable users to access printers shared on the network. Print servers manage print jobs and provide centralized control of printing. Why Not B (DHCP server): DHCP is unrelated to print management. Why Not D (Printer subnet): Subnets group devices but don’t manage printing. Why Not E (SMB configuration): SMB is for file sharing, not specifically print management. Why Not F (Printer Wi-Fi settings): These settings are irrelevant since the printers use Ethernet. CompTIA A+ Exam Reference: Core 2 (220-1102), Section 4."}, {"id": 133, "stem": "A user reported performance issues on a computer after a recent OS update A technician is confident that rolling back the system will resolve the issue. Which of the following steps should the technician take next?", "options": {"A": "Document the findings.", "B": "Investigate any recent infrastructure changes."}, "answers": ["C"], "domain": 5, "multi": false, "exp": "C. Initiate the system restore: If the technician is confident that rolling back the system to a previous restore point will resolve the issue, the next logical step is to initiate the System Restore process. System Restore allows the system to revert to a state before the OS update, which can eliminate the performance issues caused by the update. Incorrect Options: A. Document the findings: Documentation is important but should occur after resolving the issue. B. Investigate any recent infrastructure changes: This is unnecessary if the issue is already attributed to the OS update. D."}, {"id": 134, "stem": "A company deploys server machines in a public cloud. Which of the following cloud service models is this an example of?", "options": {"A": "Platform as a service", "B": "Anything as a service", "C": "Infrastructure as a service", "D": "Software as a service"}, "answers": ["C"], "domain": 4, "multi": false, "exp": "Infrastructure as a Service (IaaS) provides virtualized computing resources over the internet. This includes virtual servers, storage, and networking. Deploying server machines falls under IaaS since the organization is responsible for managing the OS and applications on top of the infrastructure. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 8, \"Virtualization and Cloud Computing\", page 488-490. Also found in the220-1201 objectives, section 4.1. A technician is troubleshooting a desktop PC that is plugged into a UPS."}, {"id": 135, "stem": "A technician is troubleshooting a desktop PC that is plugged into a UPS. The PC loses the system date/time after every power outage. Which of the following should the technician do to resolve the issue? (Select two). A. Runa BIOS update. . Swap out the RAM. . Disable NTP in the OS. 0 OO . Repair the backup power source.", "options": {"E": "Replace the CMOS battery", "F": "Install a surge protector."}, "answers": ["D", "E"], "domain": 2, "multi": true, "exp": "The system date/time is maintained by the CMOS battery when the PC is powered off. If this battery fails, time resets will occur. Additionally, since the system is connected to a UPS, ensuring the UPS is functioning correctly (i.e., the backup power source) is essential. Reference: \"CompTIA A+ Complete Study Guide\" by Quentin Docter — Chapter 1, page 40. Which of the following is a benefit of using a VLAN? A. It minimizes collision domains. B. It provides private access to cloud resources. C. It increases network address space. D. It enables secure network segmentation."}, {"id": 136, "stem": "Which of the following is a benefit of using a VLAN?", "options": {"A": "It minimizes collision domains.", "B": "It provides private access to cloud resources.", "C": "It increases network address space.", "D": "It enables secure network segmentation."}, "answers": ["D"], "domain": 4, "multi": false, "exp": "A VLAN (Virtual Local Area Network) segments a physical network into separate logical networks, enhancing security by isolating traffic. Why Not A (Minimizes collision domains): VLANs manage broadcast domains, not collision domains. Why Not B (Provides private access to cloud resources): VLANs operate within a local network, not cloud- specific. Why Not C (Increases network address space): VLANs do not affect address space. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 2.6, VLAN concepts. Which of the following best characterizes the use of a virtual machine as a sandbox? A."}, {"id": 137, "stem": "Which of the following best characterizes the use of a virtual machine as a sandbox?", "options": {"A": "Run an application on multiple workstations without installation.", "B": "Explore how an application behaves in a different environment", "C": "Migrate a currently used legacy application from physical to virtual", "D": "Create a firewall where the sandbox acts as a perimeter network."}, "answers": ["B"], "domain": 4, "multi": false, "exp": "A sandbox in virtualization allows testing an application in an isolated environment to observe its behavior without affecting the host system. Why Not A (Run an application on multiple workstations): This describes application virtualization, not sandboxing. Why Not C (Migrate a legacy application): This is about virtualization for legacy support, not testing. Why Not D (Create a firewall): A firewall does not act as a sandbox for application testing. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 4.2, virtualization and sandboxing."}, {"id": 138, "stem": "After a technician installs a new motherboard, the computer will not start and fails POST. The technician verifies the power supply is functioning as expected, and the CPU is installed correctly. Which of the following steps should the technician complete next?", "options": {"A": "Flash the BIOS.", "B": "Check the CMOS battery.", "C": "Reseat the RAM.", "D": "Reinstall the old motherboard."}, "answers": ["C"], "domain": 2, "multi": false, "exp": "A common reason for aPOST failureafter a motherboard installation isimproperly seated RAM. The system requires working memory to successfully complete POST. Reseating (removing and reinserting) the RAM ensures it's making proper contact with the motherboard. Option A:Flashing the BIOS is not possible if the system won’t POST. Option B:A dead CMOS battery can cause BIOS settings to reset, but it usually won’t prevent POST entirely. Option D:Reinstalling the old motherboard is premature — basic troubleshooting steps should be completed first."}, {"id": 139, "stem": "A projector has been shutting down after 30 minutes of use, and it has a strange smell The technician confirms the power source is not the cause of the issue Which of the following steps should the technician take next to resolve this issue?", "options": {"A": "Replace the bulb", "B": "Check the projector configuration.", "C": "Clean the filter", "D": "Adjust the gamma settings."}, "answers": ["C"], "domain": 5, "multi": false, "exp": "Reasoning: Projectors have air filters that prevent dust from entering the internal components. A clogged filter can cause the projector to overheat, resulting in shutdowns and even strange smells due to overheating components. Cleaning the filter is a standard troubleshooting step when projectors exhibit overheating symptoms. Why the Other Options Are Incorrect: A. Replace the bulb: While a failing bulb may eventually cause issues, it would not typically result in a strange smell or repeated shutdowns after a fixed period. Bulb issues usually manifest as dim or flickering images. B."}, {"id": 140, "stem": "A user is experiencing multiple issues with an in-place upgrade of a laptop's operating system. The built-in camera is unresponsive, and the user is unable to pair the device with any Bluetooth accessories. Which of the following ate most likely causing three issues? (Select two).", "options": {"A": "Incorrect configuration of the settings", "B": "OS and device version incompatibility", "C": "Disabled settings following the upgrade", "D": "Full storage", "E": "Outdated drivers", "F": "Corrupted registry entries"}, "answers": ["C", "E"], "domain": 1, "multi": true, "exp": "Outdated drivers: Device functionality issues after an OS upgrade are often caused by incompatible or outdated drivers. Disabled settings: Some features may be disabled during the upgrade process, requiring re-enablement. Why Not A (Incorrect configuration): This is unlikely given the issues arose only after the upgrade. Why Not B (OS and device incompatibility): Upgrades check for compatibility before installation. Why Not D (Full storage): Storage issues typically prevent installation, not device functionality."}, {"id": 141, "stem": "Which of the following cable types can be used to transfer data and video?", "options": {"A": "USB-C", "B": "HDMI", "C": "DisplayPort", "D": "VGA"}, "answers": ["A"], "domain": 2, "multi": false, "exp": "USB-Cis a versatile connector capable oftransmitting data, video, audio, and power. With standards likeDisplayPort over USB-C or Thunderbolt 3/4, it can be used for external displays, file transfers, charging, and more — all through one cable. Option B (HDMI):Supports video and audio but not general data transfer. Option C (DisplayPort):Similar to HDMI — supports video/audio but not general file transfer. Option D (VGA):Legacy analog video only — no data or audio support. CompTIA A+ Core 1 Exam Objective Reference: Objective 3.1: Identify common connector types."}, {"id": 142, "stem": "A technician is replacing a failed power supply in a ten-year-old computer When installing the customer- provided power supply, the technician discovers the ATX connector would not plug into the motherboard. The customer wants a cost-effective solution. Which of the following should the technician do next?", "options": {"A": "Adjust the input voltage.", "B": "Install a modular power supply.", "C": "Rebuild the failed power supply.", "D": "Use a 20-pin to 24-pin adapter."}, "answers": ["D"], "domain": 2, "multi": false, "exp": "Older motherboards use 20-pin connectors, while newer power supplies use 24-pin connectors. An adapter resolves the compatibility issue cost-effectively. Why Not A (Adjust the input voltage): Input voltage adjustment is unrelated to connector compatibility. Why Not B (Install a modular power supply): While modular supplies are versatile, this doesn’t address the connector issue directly. Why Not C (Rebuild the failed power supply): Rebuilding is costly and complex compared to using an adapter. CompTIA A+ Exam Reference: Core 1 (220-1201), Section 3.4, power supply compatibility."}];
+
+const DOMAIN_NAMES = {
+  1: 'Mobile Devices',
+  2: 'Hardware',
+  3: 'Networking',
+  4: 'Virtualization & Cloud',
+  5: 'HW & Network Troubleshooting'
+};
+const DOMAIN_COLORS = { 1:'var(--d1)', 2:'var(--d2)', 3:'var(--d3)', 4:'var(--d4)', 5:'var(--d5)' };
+
+const SECTION_DB = {};
+const CHAPTER_NAMES = {};
+const QUESTION_MAP = {};
+
+
+let quizQuestions = [];
+let currentIndex = 0;
+let selectedAnswers = {};
+let flagged = new Set();
+let skipped = new Set();
+let timerInterval = null;
+let timeLeft = 0;
+let quizMode = 'exam';
+let practiceMode = false;
+let quizStartTime = null;
+let sessionHistory = JSON.parse(localStorage.getItem('aplus1201_history') || '[]');
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz(mode) {
+  quizMode = mode;
+  practiceMode = (mode === 'practice' || mode === 'quick' || mode === 'weak' || mode === 'new450');
+  flagged = new Set();
+  skipped = new Set();
+  selectedAnswers = {};
+  currentIndex = 0;
+
+  let pool = [...ALL_QUESTIONS];
+
+  if (mode === 'weak') {
+    pool = pool.filter(q => [4, 5].includes(q.domain));
+  }
+  if (mode === 'new450') {
+    pool = pool.filter(q => q.id >= 90);
+  }
+
+  pool = shuffle(pool);
+
+  const count = mode === 'quick' ? 20 : mode === 'weak' ? 28 : mode === 'new450' ? 44 : 90;
+  quizQuestions = pool.slice(0, Math.min(count, pool.length));
+
+  if (mode === 'exam') {
+    timeLeft = 90 * 60;
+    startTimer();
+  } else {
+    timeLeft = 0;
+    document.getElementById('timer-display').textContent = '∞';
+    document.getElementById('timer-box').style.opacity = '0.4';
+  }
+
+  quizStartTime = Date.now();
+  document.getElementById('q-total').textContent = quizQuestions.length;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  const box = document.getElementById('timer-box');
+  box.style.opacity = '1';
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      finishQuiz();
+      return;
+    }
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timer-display').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    box.classList.remove('warn','danger');
+    if (timeLeft <= 300) box.classList.add('danger');
+    else if (timeLeft <= 600) box.classList.add('warn');
+  }, 1000);
+}
+
+function renderQuestion() {
+  const q = quizQuestions[currentIndex];
+  if (!q) { finishQuiz(); return; }
+
+  document.getElementById('q-current').textContent = currentIndex + 1;
+
+  const pct = ((currentIndex) / quizQuestions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const dtag = document.getElementById('q-domain-tag');
+  dtag.textContent = `D${q.domain}`;
+  dtag.style.background = `rgba(${domainRgb(q.domain)},0.12)`;
+  dtag.style.color = DOMAIN_COLORS[q.domain];
+  dtag.style.border = `1px solid rgba(${domainRgb(q.domain)},0.3)`;
+
+  const hint = document.getElementById('multi-hint');
+  if (q.multi) {
+    hint.style.display = 'inline-block';
+    const count = q.answers.length;
+    hint.textContent = `SELECT ${numberWord(count)}`;
+  } else {
+    hint.style.display = 'none';
+  }
+
+  document.getElementById('q-stem').innerHTML = q.stem;
+
+  const optList = document.getElementById('options-list');
+  optList.innerHTML = '';
+  Object.entries(q.options).forEach(([key, val]) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.key = key;
+    btn.innerHTML = `<span class="option-key">${key}.</span><span>${val}</span>`;
+    btn.onclick = () => toggleOption(key, btn, q);
+    optList.appendChild(btn);
+  });
+
+  document.getElementById('explanation-box').classList.remove('show');
+  document.getElementById('btn-submit').style.display = 'inline-block';
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-skip').style.display = 'inline-block';
+
+  const flagBtn = document.getElementById('btn-flag');
+  flagBtn.style.color = flagged.has(currentIndex) ? 'var(--warn)' : '';
+  flagBtn.style.borderColor = flagged.has(currentIndex) ? 'var(--warn)' : '';
+}
+
+function domainRgb(d) {
+  return {1:'91,173,230',2:'155,89,182',3:'46,204,113',4:'243,156,18',5:'231,76,60'}[d] || '107,122,148';
+}
+
+function numberWord(n) {
+  return ['','ONE','TWO','THREE','FOUR','FIVE'][n] || n;
+}
+
+function toggleOption(key, btn, q) {
+  const prev = selectedAnswers[currentIndex] || [];
+  if (q.multi) {
+    const needed = q.answers.length;
+    if (prev.includes(key)) {
+      selectedAnswers[currentIndex] = prev.filter(k => k !== key);
+      btn.classList.remove('selected');
+    } else {
+      if (prev.length < needed) {
+        selectedAnswers[currentIndex] = [...prev, key];
+        btn.classList.add('selected');
+      }
+    }
+  } else {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    selectedAnswers[currentIndex] = [key];
+    btn.classList.add('selected');
+  }
+
+  const sel = selectedAnswers[currentIndex] || [];
+  const needed = q.answers.length;
+  document.getElementById('btn-submit').disabled = sel.length < needed;
+}
+
+function submitAnswer() {
+  const q = quizQuestions[currentIndex];
+  const sel = selectedAnswers[currentIndex] || [];
+  const correct = q.answers;
+
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.disabled = true;
+    const k = btn.dataset.key;
+    const isCorrect = correct.includes(k);
+    const isSelected = sel.includes(k);
+
+    if (isCorrect) btn.classList.add('correct');
+    else if (isSelected && !isCorrect) btn.classList.add('wrong');
+    if (isCorrect && !isSelected) btn.classList.add('reveal-correct');
+  });
+
+  if (practiceMode) {
+    const exp = document.getElementById('explanation-box');
+    const correctLabels = correct.map(k => `${k}. ${q.options[k]}`).join(' / ');
+    document.getElementById('explanation-text').innerHTML = `<strong style="color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:0.05em;">CORRECT ANSWER</strong><br>${correctLabels}` + (q.exp ? `<br><br><span style="color:var(--text);opacity:0.85">${q.exp}</span>` : '');
+    exp.classList.add('show');
+  }
+
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('btn-skip').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'inline-block';
+}
+
+function skipQuestion() {
+  skipped.add(currentIndex);
+  selectedAnswers[currentIndex] = [];
+  nextQuestion();
+}
+
+function toggleFlag() {
+  if (flagged.has(currentIndex)) flagged.delete(currentIndex);
+  else flagged.add(currentIndex);
+  const btn = document.getElementById('btn-flag');
+  btn.style.color = flagged.has(currentIndex) ? 'var(--warn)' : '';
+  btn.style.borderColor = flagged.has(currentIndex) ? 'var(--warn)' : '';
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= quizQuestions.length) {
+    finishQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishQuiz() {
+  clearInterval(timerInterval);
+
+  let correct = 0, total = 0;
+  const domainStats = {};
+  for (let d = 1; d <= 5; d++) domainStats[d] = { correct: 0, total: 0 };
+
+  quizQuestions.forEach((q, i) => {
+    const sel = selectedAnswers[i] || [];
+    const isCorrect = JSON.stringify([...sel].sort()) === JSON.stringify([...q.answers].sort());
+    if (!skipped.has(i)) {
+      total++;
+      if (isCorrect) correct++;
+    }
+    domainStats[q.domain].total++;
+    if (isCorrect && !skipped.has(i)) domainStats[q.domain].correct++;
+  });
+
+  const pct = total > 0 ? Math.round((correct / quizQuestions.length) * 100) : 0;
+  const passed = pct >= 75;
+
+  const grade = document.getElementById('result-grade');
+  grade.textContent = pct + '%';
+  grade.className = 'result-grade ' + (passed ? 'pass' : 'fail');
+
+  document.getElementById('result-verdict').textContent = passed ? '✓ Exam simulation passed' : '✗ Keep drilling — not there yet';
+
+  const elapsed = Math.round((Date.now() - quizStartTime) / 1000);
+  const em = Math.floor(elapsed / 60), es = elapsed % 60;
+  document.getElementById('result-sub').textContent =
+    `${correct} / ${quizQuestions.length} correct · ${skipped.size} skipped · Time: ${em}m ${es}s`;
+
+  const meta = document.getElementById('result-meta');
+  meta.innerHTML = [
+    ['Correct', correct],
+    ['Wrong', quizQuestions.length - correct - skipped.size],
+    ['Skipped', skipped.size],
+    ['Flagged', flagged.size],
+  ].map(([label, val]) => `
+    <div class="stat-card">
+      <div class="stat-num" style="font-size:24px;">${val}</div>
+      <div class="stat-label">${label}</div>
+    </div>
+  `).join('');
+
+  const domainDiv = document.getElementById('result-domains');
+  domainDiv.innerHTML = '';
+  for (let d = 1; d <= 5; d++) {
+    const ds = domainStats[d];
+    const dpct = ds.total > 0 ? Math.round((ds.correct / ds.total) * 100) : 0;
+    const color = DOMAIN_COLORS[d];
+    domainDiv.innerHTML += `
+      <div class="rd-row">
+        <div class="rd-label">D${d} · ${DOMAIN_NAMES[d]}</div>
+        <div class="rd-bar-track">
+          <div class="rd-bar-fill" style="width:${dpct}%;background:${color}"></div>
+        </div>
+        <div class="rd-pct" style="color:${color}">${dpct}%</div>
+      </div>
+    `;
+  }
+
+  // Save to history
+  const entry = { date: new Date().toLocaleDateString(), mode: quizMode, pct, correct, total: quizQuestions.length, passed };
+  sessionHistory.unshift(entry);
+  if (sessionHistory.length > 10) sessionHistory.pop();
+  try { localStorage.setItem('aplus1201_history', JSON.stringify(sessionHistory)); } catch(e){}
+
+  renderHistory();
+  generateStudyReport();
+  showScreen('screen-results');
+}
+
+
+function generateStudyReport() {
+  const domainSections = {};
+  for (let d = 1; d <= 5; d++) domainSections[d] = { wrong: 0, total: 0, sections: {} };
+
+  quizQuestions.forEach((q, i) => {
+    const sel = selectedAnswers[i] || [];
+    const isSkipped = skipped.has(i) || sel.length === 0;
+    const isCorrect = !isSkipped && JSON.stringify([...sel].sort()) === JSON.stringify([...q.answers].sort());
+    
+    domainSections[q.domain].total++;
+    
+    if (!isCorrect) {
+      domainSections[q.domain].wrong++;
+      const secId = QUESTION_MAP[q.id];
+      if (secId && SECTION_DB[secId]) {
+        if (!domainSections[q.domain].sections[secId]) {
+          domainSections[q.domain].sections[secId] = { count: 0, sec: SECTION_DB[secId] };
+        }
+        domainSections[q.domain].sections[secId].count++;
+      }
+    }
+  });
+
+  // Sort domains by weakness (highest wrong% first)
+  const sorted = Object.entries(domainSections)
+    .filter(([d, data]) => data.wrong > 0)
+    .sort((a, b) => (b[1].wrong / b[1].total) - (a[1].wrong / a[1].total));
+
+  if (sorted.length === 0) {
+    document.getElementById('study-report').innerHTML = '<div style="color:var(--success);font-size:14px;padding:16px;">Perfect score — no review needed.</div>';
+    return;
+  }
+
+  let reportHtml = '';
+  sorted.forEach(([domain, data]) => {
+    const pct = Math.round((data.wrong / data.total) * 100);
+    const color = DOMAIN_COLORS[domain];
+
+    // Merge overlapping page ranges per chapter
+    const chapterPages = {};
+    Object.values(data.sections).forEach(({ sec }) => {
+      const ch = sec.ch;
+      if (!chapterPages[ch]) chapterPages[ch] = [];
+      chapterPages[ch].push({ sec: sec.sec, title: sec.t, start: sec.p[0], end: sec.p[1] });
+    });
+
+    // Merge page ranges within each chapter
+    Object.keys(chapterPages).forEach(ch => {
+      chapterPages[ch].sort((a, b) => a.start - b.start);
+      const merged = [];
+      let cur = { ...chapterPages[ch][0] };
+      for (let i = 1; i < chapterPages[ch].length; i++) {
+        const next = chapterPages[ch][i];
+        if (next.start <= cur.end + 5) {
+          cur.end = Math.max(cur.end, next.end);
+          cur.title += ', ' + next.title;
+          cur.sec += ' & ' + next.sec;
+        } else {
+          merged.push(cur);
+          cur = { ...next };
+        }
+      }
+      merged.push(cur);
+      chapterPages[ch] = merged;
+    });
+
+    // Build section cards
+    let sectionsHtml = '';
+    Object.entries(chapterPages)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .forEach(([ch, ranges]) => {
+        ranges.forEach(r => {
+          sectionsHtml += '<div class="sr-section">' +
+            '<div class="sr-ch">Ch ' + ch + ' — ' + CHAPTER_NAMES[ch] + '</div>' +
+            '<div class="sr-detail">' + r.sec + ': ' + r.title + '</div>' +
+            '<div class="sr-pages">pp. ' + r.start + '–' + r.end + '</div>' +
+          '</div>';
+        });
+      });
+
+    reportHtml += '<div class="sr-domain">' +
+      '<div class="sr-domain-header">' +
+        '<span class="sr-domain-name" style="color:' + color + '">D' + domain + ' · ' + DOMAIN_NAMES[domain] + '</span>' +
+        '<span class="sr-domain-miss" style="color:' + color + '">' + data.wrong + '/' + data.total + ' missed (' + pct + '%)</span>' +
+      '</div>' +
+      sectionsHtml +
+    '</div>';
+  });
+
+  document.getElementById('study-report').innerHTML = reportHtml;
+}
+
+function devMode() {
+  quizMode = 'dev';
+  practiceMode = true;
+  flagged = new Set();
+  skipped = new Set();
+  selectedAnswers = {};
+  currentIndex = 0;
+
+  let pool = shuffle([...ALL_QUESTIONS]).slice(0, 20);
+  quizQuestions = pool;
+  quizStartTime = Date.now() - 120000;
+
+  // Simulate: ~60% correct, ~15% wrong, ~25% skipped
+  quizQuestions.forEach((q, i) => {
+    const roll = Math.random();
+    if (roll < 0.60) {
+      selectedAnswers[i] = [...q.answers];
+    } else if (roll < 0.75) {
+      const wrongKeys = Object.keys(q.options).filter(k => !q.answers.includes(k));
+      selectedAnswers[i] = wrongKeys.length ? [wrongKeys[0]] : [...q.answers];
+    } else {
+      skipped.add(i);
+      selectedAnswers[i] = [];
+    }
+    if (Math.random() < 0.1) flagged.add(i);
+  });
+
+  document.getElementById('q-total').textContent = quizQuestions.length;
+  finishQuiz();
+}
+
+function renderHistory() {
+  if (sessionHistory.length === 0) return;
+  const sec = document.getElementById('score-history-section');
+  const hist = document.getElementById('score-history');
+  sec.style.display = 'block';
+  hist.innerHTML = sessionHistory.slice(0, 5).map(e => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:8px;font-size:13px;">
+      <span style="color:var(--muted);">${e.date} · ${e.mode}</span>
+      <span style="font-family:var(--mono);font-weight:600;color:${e.passed?'var(--success)':'var(--danger)'};">${e.pct}%</span>
+    </div>
+  `).join('');
+}
+
+function showReview() {
+  setFilter('all', document.querySelector('.filter-btn'));
+  showScreen('screen-review');
+}
+
+function setFilter(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  quizQuestions.forEach((q, i) => {
+    const sel = selectedAnswers[i] || [];
+    const isSkipped = skipped.has(i) || sel.length === 0;
+    const isCorrect = !isSkipped && JSON.stringify([...sel].sort()) === JSON.stringify([...q.answers].sort());
+    const isFlagged = flagged.has(i);
+
+    if (type === 'wrong' && (isCorrect || isSkipped)) return;
+    if (type === 'correct' && (!isCorrect || isSkipped)) return;
+    if (type === 'skipped' && !isSkipped) return;
+    if (type === 'flagged' && !isFlagged) return;
+
+    const stateClass = isSkipped ? 'skipped-item' : isCorrect ? 'correct-item' : 'wrong-item';
+    const tag = isSkipped ? '<span class="review-result-tag tag-skipped">SKIPPED</span>' :
+                isCorrect ? '<span class="review-result-tag tag-correct">CORRECT</span>' :
+                            '<span class="review-result-tag tag-wrong">WRONG</span>';
+
+    const optsHtml = Object.entries(q.options).map(([k, v]) => {
+      const isAns = q.answers.includes(k);
+      const isSel = sel.includes(k);
+      let cls = 'r-normal';
+      if (isAns) cls = 'r-correct';
+      else if (isSel && !isAns) cls = 'r-wrong';
+      return `<div class="review-opt ${cls}"><span style="font-family:var(--mono);font-size:12px;flex-shrink:0;">${k}.</span><span>${v}</span></div>`;
+    }).join('');
+
+    const expHtml = q.exp ? `<div class="review-exp"><strong>WHY:</strong> ${q.exp}</div>` : '';
+    list.innerHTML += `
+      <div class="review-item ${stateClass}">
+        <div class="review-q-num">Q${i+1} · DOMAIN ${q.domain}: ${DOMAIN_NAMES[q.domain]}${isFlagged?' · ⚑ FLAGGED':''} ${tag}</div>
+        <div class="review-stem">${q.stem}</div>
+        <div class="review-opts">${optsHtml}</div>
+        ${expHtml}
+      </div>
+    `;
+  });
+
+  if (list.innerHTML === '') {
+    list.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:20px 0;">No questions match this filter.</div>';
+  }
+}
+
+renderHistory();
+</script>
+</body>
+</html>
